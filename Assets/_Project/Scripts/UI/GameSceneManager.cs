@@ -1,8 +1,12 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using MagicalCompetition.Controllers;
 using MagicalCompetition.Core.Model;
+using MagicalCompetition.Core.Systems;
 using MagicalCompetition.Core.AI;
 using MagicalCompetition.Views;
 
@@ -131,7 +135,7 @@ namespace MagicalCompetition.UI
 
         private IEnumerator ExecuteAITurn()
         {
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(1.0f);
 
             var state = _gameController.State;
             int aiIndex = state.CurrentPlayerIndex - 1;
@@ -140,18 +144,19 @@ namespace MagicalCompetition.UI
             if (aiIndex >= 0 && aiIndex < _aiInfoViews.Length)
                 _aiInfoViews[aiIndex].HideThinking();
 
+            var playerName = $"AI{state.CurrentPlayerIndex}";
             if (action.Type == PlayType.Pass)
             {
                 _gameController.ExecutePass(action);
-                Debug.Log($"[AI{state.CurrentPlayerIndex}] Passed. Phase={_gameController.State.CurrentPhase}");
+                Debug.Log($"{playerName}:pass");
             }
             else
             {
-                var ai = state.CurrentPlayer;
+                var fieldNumberBefore = state.Field.Number;
                 _gameController.ExecutePlayCards(action);
                 _gameController.ExecuteDraw();
                 _gameController.ExecuteCheckWin();
-                Debug.Log($"[AI{state.CurrentPlayerIndex}] Played {action.Cards.Count} cards. Hand={ai.Hand.Count} Deck={ai.Deck.Count} Phase={_gameController.State.CurrentPhase}");
+                Debug.Log(FormatPlayLog(playerName, action, fieldNumberBefore));
             }
 
             UpdateAllViews();
@@ -163,17 +168,16 @@ namespace MagicalCompetition.UI
             if (!_inputController.CanConfirmPlay()) return;
 
             var action = _inputController.ConfirmPlay();
+            var fieldNumberBefore = _gameController.State.Field.Number;
             _gameController.ExecutePlayCards(action);
             _gameController.ExecuteDraw();
             _gameController.ExecuteCheckWin();
 
-            var state = _gameController.State;
-            var p = state.Players[0];
-            Debug.Log($"[Player] Played {action.Cards.Count} cards. Hand={p.Hand.Count} Deck={p.Deck.Count} Phase={state.CurrentPhase}");
+            Debug.Log(FormatPlayLog("Player", action, fieldNumberBefore));
 
             UpdateAllViews();
 
-            if (state.CurrentPhase == GamePhase.End)
+            if (_gameController.State.CurrentPhase == GamePhase.End)
             {
                 ShowResult();
                 return;
@@ -184,10 +188,23 @@ namespace MagicalCompetition.UI
 
         private void OnPassButton()
         {
+            // 選択中のカードがあれば山札に戻すカードとして設定
+            foreach (var card in _inputController.SelectedCards)
+                _inputController.SelectCardToReturn(card);
+
             var action = _inputController.ConfirmPass();
             _gameController.ExecutePass(action);
 
-            Debug.Log($"[Player] Passed. Phase={_gameController.State.CurrentPhase}");
+            var returnedCards = action.Cards;
+            if (returnedCards.Count > 0)
+            {
+                var cardList = string.Join(",", returnedCards.Select(c => FormatCard(c)));
+                Debug.Log($"Player:pass(return:{cardList})");
+            }
+            else
+            {
+                Debug.Log("Player:pass");
+            }
 
             UpdateAllViews();
             HandlePostAction();
@@ -276,6 +293,66 @@ namespace MagicalCompetition.UI
                 _gameUI.SetPlayButtonEnabled(false);
                 _gameUI.SetPassButtonEnabled(false);
             }
+        }
+
+        /// <summary>プレイアクションのログ文字列を生成する。</summary>
+        private string FormatPlayLog(string playerName, PlayAction action, int fieldNumber)
+        {
+            var cards = action.Cards;
+            var lastCard = action.LastCard;
+            var cardList = string.Join(",", cards.Select(c => FormatCard(c)));
+
+            string typeLabel;
+            string detail;
+
+            switch (action.Type)
+            {
+                case PlayType.SameNumber:
+                    typeLabel = "number";
+                    detail = $"[{cardList}]";
+                    break;
+
+                case PlayType.Arithmetic:
+                    typeLabel = "same";
+                    var validator = new ArithmeticValidator();
+                    var expressions = validator.FindValidExpressions(cards, fieldNumber);
+                    if (expressions.Count > 0)
+                    {
+                        var expr = expressions[0];
+                        var sb = new StringBuilder();
+                        sb.Append(FormatCard(expr.Cards[0]));
+                        for (int i = 0; i < expr.Operators.Count; i++)
+                        {
+                            sb.Append(expr.Operators[i] == '+' ? "+" : "-");
+                            sb.Append(FormatCard(expr.Cards[i + 1]));
+                        }
+                        sb.Append($" = {expr.Result}");
+                        detail = $"[{sb}]";
+                    }
+                    else
+                    {
+                        detail = $"[{cardList} = {fieldNumber}]";
+                    }
+                    break;
+
+                case PlayType.SameColor:
+                    typeLabel = "color";
+                    detail = $"[{cardList}]";
+                    break;
+
+                default:
+                    typeLabel = action.Type.ToString().ToLower();
+                    detail = $"[{cardList}]";
+                    break;
+            }
+
+            var lastCardStr = lastCard != null ? $" {FormatCard(lastCard)}" : "";
+            return $"{playerName}:{typeLabel}{detail}{lastCardStr}";
+        }
+
+        private static string FormatCard(Card card)
+        {
+            return $"{card.Color.ToString().ToLower()}{card.Number}";
         }
 
         private void OnDestroy()

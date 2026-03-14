@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using MagicalCompetition.Core.Model;
@@ -6,7 +7,7 @@ namespace MagicalCompetition.Views
 {
     /// <summary>
     /// AIプレイヤーの情報表示コンポーネント。
-    /// AI名・手札枚数・山札枚数・リーチ状態・思考中表示を管理する。
+    /// AI名・手札（裏面カード）・山札枚数・リーチ状態・思考中表示を管理する。
     /// </summary>
     public class AIInfoView : MonoBehaviour
     {
@@ -15,6 +16,10 @@ namespace MagicalCompetition.Views
         [SerializeField] private Text _deckCountText;
         [SerializeField] private GameObject _reachIcon;
         [SerializeField] private GameObject _thinkingIcon;
+        [SerializeField] private Transform _handContainer;
+
+        private readonly List<GameObject> _cardBacks = new List<GameObject>();
+        private Sprite _backSprite;
 
         /// <summary>AIプレイヤーの情報を更新する。</summary>
         public void UpdateInfo(PlayerState aiPlayer)
@@ -23,13 +28,55 @@ namespace MagicalCompetition.Views
                 _aiNameText.text = $"AI{aiPlayer.PlayerId}";
 
             if (_handCountText != null)
-                _handCountText.text = aiPlayer.Hand.Count.ToString();
+                _handCountText.text = $"{aiPlayer.Hand.Count}枚";
 
             if (_deckCountText != null)
-                _deckCountText.text = aiPlayer.Deck.Count.ToString();
+                _deckCountText.text = $"山札:{aiPlayer.Deck.Count}";
 
             if (_reachIcon != null)
                 _reachIcon.SetActive(aiPlayer.IsReach);
+
+            UpdateHandCards(aiPlayer.Hand.Count);
+        }
+
+        /// <summary>手札枚数に応じて裏面カードの表示数を更新する。</summary>
+        private void UpdateHandCards(int count)
+        {
+            if (_handContainer == null) return;
+
+            if (_backSprite == null)
+                _backSprite = CardSpriteLoader.GetBackSprite();
+
+            // 現在の表示数と合わせる
+            while (_cardBacks.Count < count)
+            {
+                var go = new GameObject($"CardBack{_cardBacks.Count}", typeof(RectTransform));
+                go.transform.SetParent(_handContainer, false);
+
+                var img = go.AddComponent<Image>();
+                if (_backSprite != null)
+                {
+                    img.sprite = _backSprite;
+                    img.color = Color.white;
+                }
+                else
+                {
+                    img.color = new Color(0.3f, 0.3f, 0.6f);
+                }
+                // AspectRatioFitter で縦に合わせた幅を自動算出
+                var arf = go.AddComponent<AspectRatioFitter>();
+                arf.aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
+                arf.aspectRatio = 0.66f; // カード比率 2:3
+
+                _cardBacks.Add(go);
+            }
+
+            while (_cardBacks.Count > count)
+            {
+                var last = _cardBacks[_cardBacks.Count - 1];
+                _cardBacks.RemoveAt(_cardBacks.Count - 1);
+                Destroy(last);
+            }
         }
 
         /// <summary>思考中アイコンを表示する。</summary>

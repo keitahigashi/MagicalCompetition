@@ -37,6 +37,7 @@ namespace MagicalCompetition.Editor
                 typeof(UnityEngine.InputSystem.UI.InputSystemUIInputModule));
 
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+            EditorSceneManager.SaveOpenScenes();
             Debug.Log("TitleScene UI built successfully!");
         }
     }

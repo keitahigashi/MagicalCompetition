@@ -174,9 +174,19 @@ namespace MagicalCompetition.Views
         public void SetSelected(bool selected)
         {
             EnsureInit();
-            _isSelected = selected;
             var pos = _rectTransform.anchoredPosition;
-            pos.y = selected ? _originalY + SelectedOffsetY : _originalY;
+            if (selected && !_isSelected)
+            {
+                // 選択開始: 現在位置を記録してから上へ移動
+                _originalY = pos.y;
+                pos.y += SelectedOffsetY;
+            }
+            else if (!selected && _isSelected)
+            {
+                // 選択解除: 記録した元の位置に戻す
+                pos.y = _originalY;
+            }
+            _isSelected = selected;
             _rectTransform.anchoredPosition = pos;
         }
 

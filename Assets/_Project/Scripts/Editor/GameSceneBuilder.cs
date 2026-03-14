@@ -1,4 +1,5 @@
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 using MagicalCompetition.Views;
@@ -12,6 +13,10 @@ namespace MagicalCompetition.Editor
         [MenuItem("Tools/MagicalCompetition/Build GameScene UI")]
         public static void BuildGameSceneUI()
         {
+            // GameSceneを自動ロード
+            var scenePath = "Assets/_Project/Scenes/GameScene.unity";
+            EditorSceneManager.OpenScene(scenePath);
+
             // 既存のCanvas取得
             var canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null)
@@ -46,13 +51,13 @@ namespace MagicalCompetition.Editor
 
             // === AI情報エリア（上部） ===
             var aiInfoArea = CreateUIObject("AIInfoArea", canvasTransform);
-            SetAnchors(aiInfoArea, new Vector2(0, 0.85f), Vector2.one, Vector2.zero, Vector2.zero);
+            SetAnchors(aiInfoArea, new Vector2(0, 0.78f), new Vector2(0.96f, 0.98f), Vector2.zero, Vector2.zero);
             var aiLayoutGroup = aiInfoArea.AddComponent<HorizontalLayoutGroup>();
-            aiLayoutGroup.spacing = 20;
+            aiLayoutGroup.spacing = 8;
             aiLayoutGroup.childAlignment = TextAnchor.MiddleCenter;
             aiLayoutGroup.childForceExpandWidth = true;
-            aiLayoutGroup.childForceExpandHeight = false;
-            aiLayoutGroup.padding = new RectOffset(20, 20, 10, 10);
+            aiLayoutGroup.childForceExpandHeight = true;
+            aiLayoutGroup.padding = new RectOffset(2, 2, 2, 2);
 
             // AI情報パネル×4
             for (int i = 1; i <= 4; i++)
@@ -66,7 +71,7 @@ namespace MagicalCompetition.Editor
             SetAnchors(fieldArea, new Vector2(0.3f, 0.4f), new Vector2(0.7f, 0.8f), Vector2.zero, Vector2.zero);
 
             var fieldCardBg = CreateUIObject("FieldCardBg", fieldArea.transform);
-            SetAnchors(fieldCardBg, new Vector2(0.3f, 0.2f), new Vector2(0.7f, 0.9f), Vector2.zero, Vector2.zero);
+            SetAnchors(fieldCardBg, new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.95f), Vector2.zero, Vector2.zero);
             var fieldImage = fieldCardBg.AddComponent<Image>();
             fieldImage.color = new Color(0.9f, 0.9f, 0.8f, 1f);
 
@@ -76,12 +81,8 @@ namespace MagicalCompetition.Editor
             fieldCardView.AddComponent<Image>();
             var fieldCV = fieldCardView.AddComponent<CardView>();
 
-            var fieldInfoText = CreateTextObject("FieldInfoText", fieldArea.transform, "場札情報", 24);
-            SetAnchors(fieldInfoText.gameObject, new Vector2(0.1f, 0f), new Vector2(0.9f, 0.2f), Vector2.zero, Vector2.zero);
-
             var fieldView = fieldArea.AddComponent<FieldView>();
             SetPrivateField(fieldView, "_fieldCardView", fieldCV);
-            SetPrivateField(fieldView, "_fieldInfoText", fieldInfoText);
 
             // === ターン表示（中央下） ===
             var turnArea = CreateUIObject("TurnIndicator", canvasTransform);
@@ -98,13 +99,18 @@ namespace MagicalCompetition.Editor
             var turnView = turnArea.AddComponent<TurnIndicatorView>();
             SetPrivateField(turnView, "_turnText", turnText);
 
-            // === プレイヤー手札エリア（下部） ===
+            // === プレイヤーエリア（下部） ===
+            // レイアウト: [出す] [手札...] [山札] [パス]
             var playerArea = CreateUIObject("PlayerArea", canvasTransform);
             SetAnchors(playerArea, new Vector2(0, 0), new Vector2(1, 0.3f), Vector2.zero, Vector2.zero);
 
-            // 手札コンテナ
+            // 「出す」ボタン（左端）
+            var playBtn = CreateButton("PlayButton", playerArea.transform, "出す");
+            SetAnchors(playBtn, new Vector2(0.01f, 0.15f), new Vector2(0.1f, 0.85f), Vector2.zero, Vector2.zero);
+
+            // 手札コンテナ（中央左）
             var handContainer = CreateUIObject("HandContainer", playerArea.transform);
-            SetAnchors(handContainer, new Vector2(0.05f, 0.3f), new Vector2(0.7f, 0.95f), Vector2.zero, Vector2.zero);
+            SetAnchors(handContainer, new Vector2(0.11f, 0.05f), new Vector2(0.72f, 0.95f), Vector2.zero, Vector2.zero);
             var handLayout = handContainer.AddComponent<HorizontalLayoutGroup>();
             handLayout.spacing = 5;
             handLayout.childAlignment = TextAnchor.MiddleCenter;
@@ -124,53 +130,50 @@ namespace MagicalCompetition.Editor
             SetPrivateField(handView, "_cardViewPrefab", cardTemplate);
             SetPrivateField(handView, "_cardContainer", handContainer.transform);
 
-            // 山札表示
+            // 山札表示（中央右）
             var deckArea = CreateUIObject("DeckArea", playerArea.transform);
-            SetAnchors(deckArea, new Vector2(0.75f, 0.3f), new Vector2(0.95f, 0.95f), Vector2.zero, Vector2.zero);
+            SetAnchors(deckArea, new Vector2(0.73f, 0.15f), new Vector2(0.88f, 0.85f), Vector2.zero, Vector2.zero);
 
-            var deckImage = CreateUIObject("DeckImage", deckArea.transform);
-            SetAnchors(deckImage, new Vector2(0.1f, 0.2f), new Vector2(0.9f, 1f), Vector2.zero, Vector2.zero);
-            var deckImg = deckImage.AddComponent<Image>();
-            deckImg.color = new Color(0.3f, 0.3f, 0.7f, 1f);
-
-            var deckCountText = CreateTextObject("DeckCountText", deckArea.transform, "0", 20);
-            SetAnchors(deckCountText.gameObject, new Vector2(0.1f, 0f), new Vector2(0.9f, 0.2f), Vector2.zero, Vector2.zero);
+            var deckCountText = CreateTextObject("DeckCountText", deckArea.transform, "山札:0", 16);
+            SetAnchors(deckCountText.gameObject, new Vector2(0f, 0.5f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
             deckCountText.alignment = TextAnchor.MiddleCenter;
+            deckCountText.color = Color.white;
+
+            var handCountText = CreateTextObject("HandCountText", deckArea.transform, "手札:0", 14);
+            SetAnchors(handCountText.gameObject, new Vector2(0f, 0f), new Vector2(1f, 0.5f), Vector2.zero, Vector2.zero);
+            handCountText.alignment = TextAnchor.MiddleCenter;
+            handCountText.color = new Color(0.8f, 0.8f, 0.8f);
 
             var reachIndicator = CreateUIObject("ReachIndicator", deckArea.transform);
-            SetAnchors(reachIndicator, new Vector2(0.6f, 0.8f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
-            var reachText = CreateTextObject("ReachText", reachIndicator.transform, "REACH!", 16);
+            SetAnchors(reachIndicator, new Vector2(0.5f, 0.8f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
+            var reachText = CreateTextObject("ReachText", reachIndicator.transform, "REACH!", 12);
             SetAnchors(reachText.gameObject, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             reachText.color = Color.red;
             reachText.alignment = TextAnchor.MiddleCenter;
             reachIndicator.SetActive(false);
 
             var deckView = deckArea.AddComponent<DeckView>();
-            SetPrivateField(deckView, "_deckImage", deckImg);
             SetPrivateField(deckView, "_countText", deckCountText);
+            SetPrivateField(deckView, "_handCountText", handCountText);
             SetPrivateField(deckView, "_reachIndicator", reachIndicator);
 
-            // === 操作パネル（GameUI） ===
-            var actionPanel = CreateUIObject("ActionPanel", playerArea.transform);
-            SetAnchors(actionPanel, new Vector2(0.2f, 0f), new Vector2(0.8f, 0.28f), Vector2.zero, Vector2.zero);
-            var actionLayout = actionPanel.AddComponent<HorizontalLayoutGroup>();
-            actionLayout.spacing = 20;
-            actionLayout.childAlignment = TextAnchor.MiddleCenter;
-            actionLayout.childForceExpandWidth = true;
-            actionLayout.childForceExpandHeight = true;
-            actionLayout.padding = new RectOffset(10, 10, 5, 5);
+            // 「パス」ボタン（右端）
+            var passBtn = CreateButton("PassButton", playerArea.transform, "パス");
+            SetAnchors(passBtn, new Vector2(0.89f, 0.15f), new Vector2(0.99f, 0.85f), Vector2.zero, Vector2.zero);
 
-            var playBtn = CreateButton("PlayButton", actionPanel.transform, "出す");
-            var passBtn = CreateButton("PassButton", actionPanel.transform, "パス");
-            var confirmBtn = CreateButton("ConfirmButton", actionPanel.transform, "確定");
+            // 確定ボタン（非表示）
+            var confirmBtn = CreateButton("ConfirmButton", playerArea.transform, "確定");
+            SetAnchors(confirmBtn, new Vector2(0.4f, 0.01f), new Vector2(0.6f, 0.14f), Vector2.zero, Vector2.zero);
             confirmBtn.SetActive(false);
 
+            // カード戻しパネル（非表示）
             var returnPanel = CreateUIObject("ReturnCardPanel", playerArea.transform);
-            SetAnchors(returnPanel, new Vector2(0.05f, 0.3f), new Vector2(0.7f, 0.95f), Vector2.zero, Vector2.zero);
+            SetAnchors(returnPanel, new Vector2(0.11f, 0.05f), new Vector2(0.72f, 0.95f), Vector2.zero, Vector2.zero);
             returnPanel.AddComponent<Image>().color = new Color(0.5f, 0.5f, 0.2f, 0.3f);
             returnPanel.SetActive(false);
 
-            var gameUI = actionPanel.AddComponent<GameUI>();
+            // GameUI（ActionPanelは不要になったのでplayerAreaに直接付与）
+            var gameUI = playerArea.AddComponent<GameUI>();
             SetPrivateField(gameUI, "_playButton", playBtn.GetComponent<Button>());
             SetPrivateField(gameUI, "_passButton", passBtn.GetComponent<Button>());
             SetPrivateField(gameUI, "_confirmButton", confirmBtn.GetComponent<Button>());
@@ -238,8 +241,8 @@ namespace MagicalCompetition.Editor
 
             // シーンを保存
             EditorUtility.SetDirty(canvas.gameObject);
-            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
-                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+            EditorSceneManager.SaveOpenScenes();
 
             Debug.Log("GameScene UI built successfully!");
         }
@@ -248,39 +251,66 @@ namespace MagicalCompetition.Editor
         {
             var panel = CreateUIObject(name, parent);
             var layoutElem = panel.AddComponent<LayoutElement>();
-            layoutElem.preferredHeight = 80;
             layoutElem.flexibleWidth = 1;
+            layoutElem.flexibleHeight = 1;
 
             var bg = panel.AddComponent<Image>();
             bg.color = new Color(0.2f, 0.2f, 0.2f, 0.7f);
 
-            var aiNameText = CreateTextObject("AINameText", panel.transform, $"AI{aiIndex}", 20);
-            SetAnchors(aiNameText.gameObject, new Vector2(0.05f, 0.5f), new Vector2(0.4f, 0.95f), Vector2.zero, Vector2.zero);
+            // LayoutGroup は使わず、アンカー比率で3行に分割
+            // 上段 80%~100%: AI名 + 山札枚数 + アイコン
+            // 中段 15%~80%:  手札カード裏面
+            // 下段  0%~15%:  手札枚数
+
+            // === 上段: AI名 + 山札 + リーチ + 思考中 ===
+            var aiNameText = CreateTextObject("AINameText", panel.transform, $"AI{aiIndex}", 11);
+            SetAnchors(aiNameText.gameObject, new Vector2(0.02f, 0.8f), new Vector2(0.28f, 1f), Vector2.zero, Vector2.zero);
             aiNameText.color = Color.white;
+            aiNameText.alignment = TextAnchor.MiddleCenter;
+            aiNameText.raycastTarget = false;
 
-            var handCountText = CreateTextObject("HandCountText", panel.transform, "手札: 3", 16);
-            SetAnchors(handCountText.gameObject, new Vector2(0.05f, 0.05f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
-            handCountText.color = Color.white;
-
-            var deckCountText = CreateTextObject("DeckCountText", panel.transform, "山札: 6", 16);
-            SetAnchors(deckCountText.gameObject, new Vector2(0.5f, 0.05f), new Vector2(0.95f, 0.5f), Vector2.zero, Vector2.zero);
-            deckCountText.color = Color.white;
+            var deckCountText = CreateTextObject("DeckCountText", panel.transform, "山札:6", 9);
+            SetAnchors(deckCountText.gameObject, new Vector2(0.28f, 0.8f), new Vector2(0.55f, 1f), Vector2.zero, Vector2.zero);
+            deckCountText.color = new Color(0.7f, 0.7f, 0.7f);
+            deckCountText.alignment = TextAnchor.MiddleLeft;
+            deckCountText.raycastTarget = false;
 
             var reachIcon = CreateUIObject("ReachIcon", panel.transform);
-            SetAnchors(reachIcon, new Vector2(0.75f, 0.55f), new Vector2(0.95f, 0.95f), Vector2.zero, Vector2.zero);
-            var reachText = CreateTextObject("ReachText", reachIcon.transform, "⚡", 18);
+            SetAnchors(reachIcon, new Vector2(0.55f, 0.8f), new Vector2(0.7f, 1f), Vector2.zero, Vector2.zero);
+            var reachText = CreateTextObject("ReachText", reachIcon.transform, "\u26A1", 11);
             SetAnchors(reachText.gameObject, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             reachText.alignment = TextAnchor.MiddleCenter;
             reachText.color = Color.yellow;
+            reachText.raycastTarget = false;
             reachIcon.SetActive(false);
 
             var thinkingIcon = CreateUIObject("ThinkingIcon", panel.transform);
-            SetAnchors(thinkingIcon, new Vector2(0.4f, 0.55f), new Vector2(0.75f, 0.95f), Vector2.zero, Vector2.zero);
-            var thinkText = CreateTextObject("ThinkingText", thinkingIcon.transform, "思考中...", 14);
+            SetAnchors(thinkingIcon, new Vector2(0.7f, 0.8f), new Vector2(0.98f, 1f), Vector2.zero, Vector2.zero);
+            var thinkText = CreateTextObject("ThinkingText", thinkingIcon.transform, "思考中...", 8);
             SetAnchors(thinkText.gameObject, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             thinkText.alignment = TextAnchor.MiddleCenter;
             thinkText.color = Color.cyan;
+            thinkText.raycastTarget = false;
             thinkingIcon.SetActive(false);
+
+            // === 中段: 手札カード裏面 ===
+            var handContainer = CreateUIObject("HandContainer", panel.transform);
+            SetAnchors(handContainer, new Vector2(0.05f, 0.2f), new Vector2(0.95f, 0.78f), Vector2.zero, Vector2.zero);
+            var handLayout = handContainer.AddComponent<HorizontalLayoutGroup>();
+            handLayout.spacing = -2;
+            handLayout.childAlignment = TextAnchor.MiddleCenter;
+            handLayout.childForceExpandWidth = false;
+            handLayout.childForceExpandHeight = true;
+            handLayout.childControlHeight = true;
+            handLayout.childControlWidth = false;
+            handLayout.padding = new RectOffset(2, 2, 0, 0);
+
+            // === 下段: 手札枚数（中央） ===
+            var handCountText = CreateTextObject("HandCountText", panel.transform, "3枚", 9);
+            SetAnchors(handCountText.gameObject, new Vector2(0.02f, 0f), new Vector2(0.98f, 0.15f), Vector2.zero, Vector2.zero);
+            handCountText.color = new Color(0.8f, 0.8f, 0.8f);
+            handCountText.alignment = TextAnchor.MiddleCenter;
+            handCountText.raycastTarget = false;
 
             var aiInfoView = panel.AddComponent<AIInfoView>();
             SetPrivateField(aiInfoView, "_aiNameText", aiNameText);
@@ -288,6 +318,7 @@ namespace MagicalCompetition.Editor
             SetPrivateField(aiInfoView, "_deckCountText", deckCountText);
             SetPrivateField(aiInfoView, "_reachIcon", reachIcon);
             SetPrivateField(aiInfoView, "_thinkingIcon", thinkingIcon);
+            SetPrivateField(aiInfoView, "_handContainer", handContainer.transform);
 
             return panel;
         }

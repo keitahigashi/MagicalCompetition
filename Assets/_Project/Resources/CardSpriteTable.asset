@@ -103,4 +103,4 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 1760edacc5063db4eaeb20b8c35fdb84, type: 3}
   - key: Wind_9
     sprite: {fileID: 21300000, guid: 7c343f33944c89842b425bfd9e8f4e13, type: 3}
-  backSprite: {fileID: 0}
+  backSprite: {fileID: 21300000, guid: 4fa0f431aad15574ebf1d8637a3a8746, type: 3}

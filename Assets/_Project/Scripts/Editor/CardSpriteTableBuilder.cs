@@ -7,16 +7,14 @@ namespace MagicalCompetition.Editor
 {
     public static class CardSpriteTableBuilder
     {
-        // 色名 → (CardColor名, ファイル番号オフセット)
-        private static readonly Dictionary<string, (string colorName, int baseNum)> ColorMap =
-            new Dictionary<string, (string, int)>
-            {
-                { "水", ("Water", 10) },
-                { "光", ("Light", 20) },
-                { "火", ("Fire",  30) },
-                { "土", ("Earth", 40) },
-                { "風", ("Wind",  50) },
-            };
+        private static readonly (string colorName, string fileLabel, int baseNum)[] Colors =
+        {
+            ("Water", "water", 10),
+            ("Light", "light", 20),
+            ("Fire",  "fire",  30),
+            ("Earth", "earth", 40),
+            ("Wind",  "wind",  50),
+        };
 
         [MenuItem("Tools/MagicalCompetition/Build CardSpriteTable")]
         public static void Build()
@@ -39,16 +37,12 @@ namespace MagicalCompetition.Editor
             var table = ScriptableObject.CreateInstance<CardSpriteTable>();
             table.entries = new List<CardSpriteTable.Entry>();
 
-            foreach (var kv in ColorMap)
+            foreach (var (colorName, fileLabel, baseNum) in Colors)
             {
-                var label = kv.Key;
-                var (colorName, baseNum) = kv.Value;
-
                 for (int number = 1; number <= 9; number++)
                 {
                     int fileNum = baseNum + number - 1;
-                    var fileName = $"{fileNum:D3}_omote_カード_魔石_{label}{number}";
-                    var path = $"Assets/_Project/Art/card/{fileName}.jpg";
+                    var path = $"Assets/_Project/Art/card/{fileNum:D3}_omote_card_stone_{fileLabel}{number}.jpg";
                     var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
 
                     if (sprite == null)
@@ -66,8 +60,10 @@ namespace MagicalCompetition.Editor
             }
 
             // 裏面
-            var backPath = "Assets/_Project/Art/card/002_ura_カード_裏面.jpg";
+            var backPath = "Assets/_Project/Art/card/002_ura_card_back.jpg";
             table.backSprite = AssetDatabase.LoadAssetAtPath<Sprite>(backPath);
+            if (table.backSprite == null)
+                Debug.LogWarning($"Back sprite not found: {backPath}");
 
             // Resources フォルダに保存
             var resourcesDir = "Assets/_Project/Resources";
@@ -79,7 +75,7 @@ namespace MagicalCompetition.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Debug.Log($"CardSpriteTable built: {table.entries.Count} card sprites + back sprite at {assetPath}");
+            Debug.Log($"CardSpriteTable built: {table.entries.Count} card sprites, backSprite={table.backSprite != null} at {assetPath}");
         }
     }
 }

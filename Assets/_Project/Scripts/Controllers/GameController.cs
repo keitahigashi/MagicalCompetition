@@ -127,6 +127,9 @@ namespace MagicalCompetition.Controllers
                 player.ReturnToDeckBottom(action.Cards);
             }
 
+            // 手札を補充（戻した分を引き直す）
+            _drawSystem.Refill(player);
+
             _turnManager.RecordPass(State);
 
             if (_turnManager.IsAllPlayersPassed(State))
