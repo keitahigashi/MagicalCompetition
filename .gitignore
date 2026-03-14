@@ -1,0 +1,83 @@
+# ============================================================================
+# Unity .gitignore — Magical Competition
+# ============================================================================
+
+# --- Unity generated ---
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# --- Memory captured by MemorySettings.asset ---
+/[Mm]emoryCaptures/
+
+# --- Asset meta auto-regeneration ---
+# (We DO track .meta files — they are essential for Unity collaboration)
+
+# --- IDE / Editor ---
+# Visual Studio
+.vs/
+*.csproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# JetBrains Rider
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# --- OS files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# --- Unity build artifacts ---
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# --- Crash reports ---
+sysinfo.txt
+crashlytics-build.properties
+
+# --- Addressables (if used later) ---
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# --- NuGet (if used) ---
+/[Aa]ssets/[Pp]lugins/NuGet*
+
+# --- Plastic SCM (Unity Version Control) ---
+*.private.0
+*.private
+
+# --- TextMeshPro examples (large, regenerable) ---
+# Uncomment if you don't need the bundled examples:
+# /Assets/TextMesh Pro/Examples & Extras/
+
+# --- Documentation build output ---
+/docs/_site/
+/docs/_build/

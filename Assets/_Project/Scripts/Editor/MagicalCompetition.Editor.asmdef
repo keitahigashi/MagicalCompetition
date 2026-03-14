@@ -1,0 +1,21 @@
+{
+    "name": "MagicalCompetition.Editor",
+    "rootNamespace": "MagicalCompetition.Editor",
+    "references": [
+        "MagicalCompetition.Core",
+        "MagicalCompetition.Views",
+        "MagicalCompetition.UI",
+        "MagicalCompetition.Controllers"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

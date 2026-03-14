@@ -1,0 +1,25 @@
+{
+    "name": "MagicalCompetition.Tests.EditMode",
+    "rootNamespace": "MagicalCompetition.Tests.EditMode",
+    "references": [
+        "MagicalCompetition.Core",
+        "MagicalCompetition.Controllers",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
