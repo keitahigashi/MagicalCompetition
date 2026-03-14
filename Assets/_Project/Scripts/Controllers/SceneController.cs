@@ -7,7 +7,7 @@ namespace MagicalCompetition.Controllers
     public class SceneController
     {
         /// <summary>AI対戦相手の人数（1〜4）。</summary>
-        public static int AICount { get; private set; }
+        public static int AICount { get; set; }
 
         /// <summary>
         /// AI人数を設定してGameSceneへの遷移準備を行う。

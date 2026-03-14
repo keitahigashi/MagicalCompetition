@@ -5,7 +5,9 @@
         "MagicalCompetition.Core",
         "MagicalCompetition.Views",
         "MagicalCompetition.UI",
-        "MagicalCompetition.Controllers"
+        "MagicalCompetition.Controllers",
+        "Unity.InputSystem",
+        "Unity.RenderPipelines.Universal.Runtime"
     ],
     "includePlatforms": [
         "Editor"

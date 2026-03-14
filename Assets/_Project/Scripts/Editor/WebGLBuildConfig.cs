@@ -1,4 +1,5 @@
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEngine;
 using System.IO;
 
@@ -28,7 +29,7 @@ namespace MagicalCompetition.Editor
 
             // ストリッピング設定
             PlayerSettings.stripEngineCode = true;
-            PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.WebGL, ManagedStrippingLevel.Medium);
+            PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.WebGL, ManagedStrippingLevel.Medium);
 
             // 解像度設定
             PlayerSettings.defaultWebScreenWidth = 1920;

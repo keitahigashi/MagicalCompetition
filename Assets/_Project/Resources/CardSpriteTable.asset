@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02751e8d1c69c5449a42f7abd2e81f84, type: 3}
+  m_Name: CardSpriteTable
+  m_EditorClassIdentifier: MagicalCompetition.Views::MagicalCompetition.Views.CardSpriteTable
+  entries:
+  - key: Water_1
+    sprite: {fileID: 21300000, guid: e1e6f4e9ea658fe428973a1baa096088, type: 3}
+  - key: Water_2
+    sprite: {fileID: 21300000, guid: 68a710f40342c1241a2e6b138bad6133, type: 3}
+  - key: Water_3
+    sprite: {fileID: 21300000, guid: 7f4fb17406e5a8744a61f8d786411a69, type: 3}
+  - key: Water_4
+    sprite: {fileID: 21300000, guid: 22baaf7df98e86f468f33fcdc42bea9a, type: 3}
+  - key: Water_5
+    sprite: {fileID: 21300000, guid: 8f570da957b07ed4c9bd3e82437a635a, type: 3}
+  - key: Water_6
+    sprite: {fileID: 21300000, guid: c7e53a6068172eb4f8e0eb71e495f14f, type: 3}
+  - key: Water_7
+    sprite: {fileID: 21300000, guid: 0606838d377886043b1293ed0d21d3aa, type: 3}
+  - key: Water_8
+    sprite: {fileID: 21300000, guid: d82e1eb4b1649734f8e09e474fd70fed, type: 3}
+  - key: Water_9
+    sprite: {fileID: 21300000, guid: f72e4b6c58db5d24a86c4c1dea440562, type: 3}
+  - key: Light_1
+    sprite: {fileID: 21300000, guid: 40977aaa01d3b614281b8bd8be5a836a, type: 3}
+  - key: Light_2
+    sprite: {fileID: 21300000, guid: 56701e2773f3b6743aebe3723646f165, type: 3}
+  - key: Light_3
+    sprite: {fileID: 21300000, guid: b5c1c78ff5db405439c72a462715e24c, type: 3}
+  - key: Light_4
+    sprite: {fileID: 21300000, guid: dc22d8f904d41434899b11ea3dead0dd, type: 3}
+  - key: Light_5
+    sprite: {fileID: 21300000, guid: 3fc0320d5b5a8ae4091ef6ae0e0cf93c, type: 3}
+  - key: Light_6
+    sprite: {fileID: 21300000, guid: 586572435521c0e4c85721ac98ba9ff7, type: 3}
+  - key: Light_7
+    sprite: {fileID: 21300000, guid: 3a40b8e4f2b46f841b02314e7e71a3c4, type: 3}
+  - key: Light_8
+    sprite: {fileID: 21300000, guid: 142708c5927834240a971b08c00ffeee, type: 3}
+  - key: Light_9
+    sprite: {fileID: 21300000, guid: 6d570161506cd984ea72c8a6ed1f124b, type: 3}
+  - key: Fire_1
+    sprite: {fileID: 21300000, guid: e902c7505e9160047b63673208137448, type: 3}
+  - key: Fire_2
+    sprite: {fileID: 21300000, guid: bf885e72c31b8a549bdd62bfdbc81875, type: 3}
+  - key: Fire_3
+    sprite: {fileID: 21300000, guid: 99f71aaab97330844832d4564947e992, type: 3}
+  - key: Fire_4
+    sprite: {fileID: 21300000, guid: 457119dbe1eab0040bb465c50b8f53f7, type: 3}
+  - key: Fire_5
+    sprite: {fileID: 21300000, guid: 921de92696a37d5428bfdf5c167b3503, type: 3}
+  - key: Fire_6
+    sprite: {fileID: 21300000, guid: 8be2760b18126a64dbea04c3bd575247, type: 3}
+  - key: Fire_7
+    sprite: {fileID: 21300000, guid: 2a5d0ce2aadf5e247b6b8513ea2a4f54, type: 3}
+  - key: Fire_8
+    sprite: {fileID: 21300000, guid: e9f12c4856f0fc544b3f627e527f6733, type: 3}
+  - key: Fire_9
+    sprite: {fileID: 21300000, guid: 7553d13dfcdb31e4f805809c4f08d8b3, type: 3}
+  - key: Earth_1
+    sprite: {fileID: 21300000, guid: 4c33d48bd76d0d8488245306feac96dc, type: 3}
+  - key: Earth_2
+    sprite: {fileID: 21300000, guid: 52b67ffaad3639a4d9c4bc9234c5a7af, type: 3}
+  - key: Earth_3
+    sprite: {fileID: 21300000, guid: 6c357ca9747ec1e47a756cdbad0f6932, type: 3}
+  - key: Earth_4
+    sprite: {fileID: 21300000, guid: 5c709cc05cd573d419af30b19c0697df, type: 3}
+  - key: Earth_5
+    sprite: {fileID: 21300000, guid: af551ad4003ec224fa4ff829e4c8ee42, type: 3}
+  - key: Earth_6
+    sprite: {fileID: 21300000, guid: ef9f2d0e39345944baaa37584dcbcfdf, type: 3}
+  - key: Earth_7
+    sprite: {fileID: 21300000, guid: 148179203f83628489bd4285c80ec4d1, type: 3}
+  - key: Earth_8
+    sprite: {fileID: 21300000, guid: 08460d1880e0d14419383f914f0b8f24, type: 3}
+  - key: Earth_9
+    sprite: {fileID: 21300000, guid: b1ee67ead9cd82d43908fc28f50cb2f4, type: 3}
+  - key: Wind_1
+    sprite: {fileID: 21300000, guid: 2082b496d52efba4298501f771e25247, type: 3}
+  - key: Wind_2
+    sprite: {fileID: 21300000, guid: c546f5e5715759a45b2f242e89d02ef3, type: 3}
+  - key: Wind_3
+    sprite: {fileID: 21300000, guid: 2693849b9c4f1d7428f24b7bee5905bc, type: 3}
+  - key: Wind_4
+    sprite: {fileID: 21300000, guid: adde5e97cb1fc3a438c1197f5898bbc9, type: 3}
+  - key: Wind_5
+    sprite: {fileID: 21300000, guid: 25dad595035f2664994407b3e127b53b, type: 3}
+  - key: Wind_6
+    sprite: {fileID: 21300000, guid: d026a98e9f1d5d645b1762b9ebbb18dc, type: 3}
+  - key: Wind_7
+    sprite: {fileID: 21300000, guid: 1dedfc00789888a45be4f48241c2dc5c, type: 3}
+  - key: Wind_8
+    sprite: {fileID: 21300000, guid: 1760edacc5063db4eaeb20b8c35fdb84, type: 3}
+  - key: Wind_9
+    sprite: {fileID: 21300000, guid: 7c343f33944c89842b425bfd9e8f4e13, type: 3}
+  backSprite: {fileID: 0}

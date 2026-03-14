@@ -28,6 +28,15 @@ namespace MagicalCompetition.Views
             foreach (var card in hand)
             {
                 var go = Instantiate(_cardViewPrefab, _cardContainer);
+                go.SetActive(true);
+
+                // LayoutElement を 2:3 アスペクト比で設定
+                var le = go.GetComponent<UnityEngine.UI.LayoutElement>();
+                if (le == null)
+                    le = go.AddComponent<UnityEngine.UI.LayoutElement>();
+                le.preferredWidth = 60;
+                le.preferredHeight = 100;
+
                 var cardView = go.GetComponent<CardView>();
                 var sprite = spriteResolver?.Invoke(card);
                 cardView.SetCard(card, sprite);

@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using MagicalCompetition.Views;
 using MagicalCompetition.UI;
+using MagicalCompetition.Controllers;
 
 namespace MagicalCompetition.Editor
 {
@@ -26,7 +27,7 @@ namespace MagicalCompetition.Editor
             if (scaler != null)
             {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                scaler.referenceResolution = new Vector2(1920, 1080);
+                scaler.referenceResolution = new Vector2(960, 540);
                 scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
                 scaler.matchWidthOrHeight = 0.5f;
             }
@@ -115,8 +116,8 @@ namespace MagicalCompetition.Editor
             cardTemplate.AddComponent<Image>();
             cardTemplate.AddComponent<CardView>();
             var templateLayout = cardTemplate.AddComponent<LayoutElement>();
-            templateLayout.preferredWidth = 100;
-            templateLayout.preferredHeight = 140;
+            templateLayout.preferredWidth = 60;
+            templateLayout.preferredHeight = 100;
             cardTemplate.SetActive(false);
 
             var handView = playerArea.AddComponent<HandView>();
@@ -207,6 +208,33 @@ namespace MagicalCompetition.Editor
             SetPrivateField(resultView, "_titleButton", titleBtn.GetComponent<Button>());
 
             resultOverlay.SetActive(false);
+
+            // Camera
+            var cam = Object.FindFirstObjectByType<Camera>();
+            if (cam == null)
+            {
+                var camGo = new GameObject("Main Camera", typeof(Camera), typeof(UnityEngine.Rendering.Universal.UniversalAdditionalCameraData));
+                camGo.tag = "MainCamera";
+                cam = camGo.GetComponent<Camera>();
+            }
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = new Color(0.1f, 0.1f, 0.2f, 1f);
+            cam.orthographic = true;
+
+            // EventSystem
+            if (Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
+            {
+                var esGo = new GameObject("EventSystem",
+                    typeof(UnityEngine.EventSystems.EventSystem),
+                    typeof(UnityEngine.InputSystem.UI.InputSystemUIInputModule));
+            }
+
+            // GameSceneManager（ゲームフロー制御）
+            if (Object.FindFirstObjectByType<GameSceneManager>() == null)
+            {
+                var managerGo = new GameObject("GameSceneManager");
+                managerGo.AddComponent<GameSceneManager>();
+            }
 
             // シーンを保存
             EditorUtility.SetDirty(canvas.gameObject);
