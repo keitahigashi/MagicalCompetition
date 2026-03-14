@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"from PIL import Image; img = Image.open\\('C:/Dev/active/Unity/Magical Competition/Assets/_Project/Art/card/010_omote_カード_魔石_水1.jpg'\\); print\\(img.size\\)\" 2>/dev/null || magick identify \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Art/card/010_omote_カード_魔石_水1.jpg\" 2>/dev/null || file \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Art/card/010_omote_カード_魔石_水1.jpg\")"
+    ]
+  }
+}
