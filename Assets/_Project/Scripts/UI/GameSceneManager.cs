@@ -32,6 +32,7 @@ namespace MagicalCompetition.UI
         private ResultDialogView _resultDialog;
         private GameUI _gameUI;
         private AIInfoView[] _aiInfoViews;
+        private PlayLogView _playLogView;
 
         private void Start()
         {
@@ -53,6 +54,9 @@ namespace MagicalCompetition.UI
             _resultDialog = FindAnyObjectByType<ResultDialogView>(FindObjectsInactive.Include);
             _gameUI = FindAnyObjectByType<GameUI>();
             _aiInfoViews = FindObjectsByType<AIInfoView>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+            // プレイログ生成（Canvas左側に配置）
+            _playLogView = CreatePlayLogView();
 
             // AI情報パネルを人数分だけ表示
             ActivateAIPanels(aiCount);
@@ -105,6 +109,31 @@ namespace MagicalCompetition.UI
 
             UpdateAllViews();
             StartPlayerTurn();
+        }
+
+        private PlayLogView CreatePlayLogView()
+        {
+            // Canvasを検索
+            var canvas = FindAnyObjectByType<Canvas>();
+            if (canvas == null) return null;
+
+            var go = new GameObject("PlayLogView", typeof(RectTransform));
+            go.transform.SetParent(canvas.transform, false);
+
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0f, 0.3f);
+            rt.anchorMax = new Vector2(0.22f, 0.78f);
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            return go.AddComponent<PlayLogView>();
+        }
+
+        private void AddPlayLog(string message)
+        {
+            Debug.Log(message);
+            if (_playLogView != null)
+                _playLogView.AddLog(message);
         }
 
         private void ActivateAIPanels(int aiCount)
@@ -174,7 +203,7 @@ namespace MagicalCompetition.UI
                 _gameController.ExecuteCheckWin();
                 aiLog = FormatPlayLog(playerName, action, fieldNumberBefore);
             }
-            Debug.Log(aiLog);
+            AddPlayLog(aiLog);
 
             UpdateAllViews();
             HandlePostAction();
@@ -190,7 +219,7 @@ namespace MagicalCompetition.UI
             _gameController.ExecuteDraw();
             _gameController.ExecuteCheckWin();
 
-            Debug.Log(FormatPlayLog("Player", action, fieldNumberBefore));
+            AddPlayLog(FormatPlayLog("Player", action, fieldNumberBefore));
 
             UpdateAllViews();
 
@@ -223,7 +252,7 @@ namespace MagicalCompetition.UI
             {
                 passLog = "Player:pass";
             }
-            Debug.Log(passLog);
+            AddPlayLog(passLog);
 
             UpdateAllViews();
             HandlePostAction();
