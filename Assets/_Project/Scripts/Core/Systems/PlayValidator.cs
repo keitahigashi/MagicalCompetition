@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using MagicalCompetition.Core.Model;
 
@@ -27,8 +28,12 @@ namespace MagicalCompetition.Core.Systems
             if (IsSameColorPlay(selectedCards, field))
                 return new PlayValidateResult(true, PlayType.SameColor);
 
-            if (IsArithmeticPlay(selectedCards, field))
-                return new PlayValidateResult(true, PlayType.Arithmetic);
+            if (selectedCards.Count >= 2 && selectedCards.Count <= 3)
+            {
+                var expressions = _arithmeticValidator.FindValidExpressions(selectedCards, field.Number);
+                if (expressions.Count > 0)
+                    return new PlayValidateResult(true, PlayType.Arithmetic, expressions[0].Cards);
+            }
 
             return PlayValidateResult.Invalid;
         }
@@ -93,8 +98,12 @@ namespace MagicalCompetition.Core.Systems
                         AddIfNotDuplicate(results, seen, PlayType.SameColor, combo);
 
                     // 計算出し判定（2〜3枚のみ）
-                    if (size >= 2 && IsArithmeticPlay(combo, field))
-                        AddIfNotDuplicate(results, seen, PlayType.Arithmetic, combo);
+                    if (size >= 2)
+                    {
+                        var expressions = _arithmeticValidator.FindValidExpressions(combo, field.Number);
+                        if (expressions.Count > 0)
+                            AddIfNotDuplicate(results, seen, PlayType.Arithmetic, expressions[0].Cards);
+                    }
                 }
             }
 
@@ -142,10 +151,17 @@ namespace MagicalCompetition.Core.Systems
         public bool IsValid { get; }
         public PlayType Type { get; }
 
-        public PlayValidateResult(bool isValid, PlayType type)
+        /// <summary>
+        /// Arithmetic の場合、計算式の順序に並んだカードリスト。
+        /// それ以外の場合は null。
+        /// </summary>
+        public ReadOnlyCollection<Card> OrderedCards { get; }
+
+        public PlayValidateResult(bool isValid, PlayType type, List<Card> orderedCards = null)
         {
             IsValid = isValid;
             Type = type;
+            OrderedCards = orderedCards?.AsReadOnly();
         }
 
         public static readonly PlayValidateResult Invalid = new PlayValidateResult(false, PlayType.Pass);

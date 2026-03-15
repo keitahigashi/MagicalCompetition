@@ -79,8 +79,23 @@ namespace MagicalCompetition.UI
                         _inputController.DeselectCard(cv.CardData);
 
                     // 出すボタンの有効/無効を更新
+                    bool canPlay = _inputController.CanConfirmPlay();
                     if (_gameUI != null)
-                        _gameUI.SetPlayButtonEnabled(_inputController.CanConfirmPlay());
+                        _gameUI.SetPlayButtonEnabled(canPlay);
+
+                    // 出せる場合はプレビューをTurnIndicatorに表示
+                    if (_turnIndicator != null)
+                    {
+                        if (canPlay)
+                        {
+                            var preview = GetPlayPreview();
+                            _turnIndicator.ShowMessage(preview);
+                        }
+                        else
+                        {
+                            _turnIndicator.ShowMessage("あなたのターン");
+                        }
+                    }
                 };
             }
 
@@ -145,10 +160,11 @@ namespace MagicalCompetition.UI
                 _aiInfoViews[aiIndex].HideThinking();
 
             var playerName = $"AI{state.CurrentPlayerIndex}";
+            string aiLog;
             if (action.Type == PlayType.Pass)
             {
                 _gameController.ExecutePass(action);
-                Debug.Log($"{playerName}:pass");
+                aiLog = $"{playerName}:pass";
             }
             else
             {
@@ -156,8 +172,9 @@ namespace MagicalCompetition.UI
                 _gameController.ExecutePlayCards(action);
                 _gameController.ExecuteDraw();
                 _gameController.ExecuteCheckWin();
-                Debug.Log(FormatPlayLog(playerName, action, fieldNumberBefore));
+                aiLog = FormatPlayLog(playerName, action, fieldNumberBefore);
             }
+            Debug.Log(aiLog);
 
             UpdateAllViews();
             HandlePostAction();
@@ -196,15 +213,17 @@ namespace MagicalCompetition.UI
             _gameController.ExecutePass(action);
 
             var returnedCards = action.Cards;
+            string passLog;
             if (returnedCards.Count > 0)
             {
                 var cardList = string.Join(",", returnedCards.Select(c => FormatCard(c)));
-                Debug.Log($"Player:pass(return:{cardList})");
+                passLog = $"Player:pass(return:{cardList})";
             }
             else
             {
-                Debug.Log("Player:pass");
+                passLog = "Player:pass";
             }
+            Debug.Log(passLog);
 
             UpdateAllViews();
             HandlePostAction();
@@ -348,6 +367,49 @@ namespace MagicalCompetition.UI
 
             var lastCardStr = lastCard != null ? $" {FormatCard(lastCard)}" : "";
             return $"{playerName}:{typeLabel}{detail}{lastCardStr}";
+        }
+
+        /// <summary>選択中カードのプレイプレビュー文字列を生成する（TurnIndicator用短縮形式）。</summary>
+        private string GetPlayPreview()
+        {
+            var selected = new List<Card>(_inputController.SelectedCards);
+            var field = _gameController.State.Field;
+            var validator = new PlayValidator();
+            var result = validator.Validate(selected, field);
+
+            var cards = result.OrderedCards != null
+                ? new List<Card>(result.OrderedCards)
+                : selected;
+
+            switch (result.Type)
+            {
+                case PlayType.SameNumber:
+                    return $"同数字: {string.Join(", ", cards.Select(c => c.Number.ToString()))}";
+
+                case PlayType.SameColor:
+                    return $"同色: {string.Join(", ", cards.Select(c => c.Number.ToString()))}";
+
+                case PlayType.Arithmetic:
+                    var arithmeticValidator = new ArithmeticValidator();
+                    var expressions = arithmeticValidator.FindValidExpressions(cards, field.Number);
+                    if (expressions.Count > 0)
+                    {
+                        var expr = expressions[0];
+                        var sb = new StringBuilder();
+                        sb.Append($"計算: {expr.Cards[0].Number}");
+                        for (int i = 0; i < expr.Operators.Count; i++)
+                        {
+                            sb.Append(expr.Operators[i] == '+' ? " + " : " - ");
+                            sb.Append(expr.Cards[i + 1].Number);
+                        }
+                        sb.Append($" = {expr.Result}");
+                        return sb.ToString();
+                    }
+                    return $"計算: {string.Join(", ", cards.Select(c => c.Number.ToString()))}";
+
+                default:
+                    return "あなたのターン";
+            }
         }
 
         private static string FormatCard(Card card)

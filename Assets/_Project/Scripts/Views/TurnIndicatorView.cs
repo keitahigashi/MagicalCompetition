@@ -26,5 +26,12 @@ namespace MagicalCompetition.Views
                 _turnText.text = $"AI{currentPlayer.PlayerId}のターン";
             }
         }
+
+        /// <summary>アクションログをターン表示に反映する。</summary>
+        public void ShowMessage(string message)
+        {
+            if (_turnText == null) return;
+            _turnText.text = message;
+        }
     }
 }

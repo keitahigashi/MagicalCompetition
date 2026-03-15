@@ -73,7 +73,11 @@ namespace MagicalCompetition.Controllers
         public PlayAction ConfirmPlay()
         {
             var result = _playValidator.Validate(_selectedCards, _field);
-            var action = PlayAction.CreatePlay(result.Type, new List<Card>(_selectedCards));
+            // Arithmetic の場合は式の順序に並んだカードを使用（LastCard が場札になる）
+            var cards = result.OrderedCards != null
+                ? new List<Card>(result.OrderedCards)
+                : new List<Card>(_selectedCards);
+            var action = PlayAction.CreatePlay(result.Type, cards);
             _selectedCards.Clear();
             OnPlayConfirmed?.Invoke(action);
             return action;
