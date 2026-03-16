@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using MagicalCompetition.Utils;
 
 namespace MagicalCompetition.Views
 {
@@ -53,7 +54,7 @@ namespace MagicalCompetition.Views
 
         private void BuildUI()
         {
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            var font = FontProvider.Regular;
 
             // 自身の RectTransform 設定（左側パネル）
             var root = GetComponent<RectTransform>();

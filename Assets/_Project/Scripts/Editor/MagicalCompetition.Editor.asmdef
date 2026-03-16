@@ -6,6 +6,7 @@
         "MagicalCompetition.Views",
         "MagicalCompetition.UI",
         "MagicalCompetition.Controllers",
+        "MagicalCompetition.Utils",
         "Unity.InputSystem",
         "Unity.RenderPipelines.Universal.Runtime"
     ],

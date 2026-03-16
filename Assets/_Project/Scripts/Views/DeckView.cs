@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using MagicalCompetition.Utils;
 
 namespace MagicalCompetition.Views
 {
@@ -41,7 +42,7 @@ namespace MagicalCompetition.Views
             text.alignment = TextAnchor.MiddleCenter;
             text.color = Color.white;
             if (text.font == null)
-                text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                text.font = FontProvider.Regular;
         }
 
         /// <summary>残り枚数を更新する。0枚時はリーチ表示。</summary>
@@ -67,7 +68,7 @@ namespace MagicalCompetition.Views
         private void EnsureHandCountText()
         {
             if (_handCountText != null) return;
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            var font = FontProvider.Regular;
             var go = new GameObject("HandCountText", typeof(RectTransform));
             go.transform.SetParent(transform, false);
             var rt = go.GetComponent<RectTransform>();
@@ -85,7 +86,7 @@ namespace MagicalCompetition.Views
 
         private void BuildUI()
         {
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            var font = FontProvider.Regular;
             var rt = GetComponent<RectTransform>();
 
             // 山札テキスト

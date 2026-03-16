@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using MagicalCompetition.Views;
 using MagicalCompetition.UI;
 using MagicalCompetition.Controllers;
+using MagicalCompetition.Utils;
 
 namespace MagicalCompetition.Editor
 {
@@ -336,7 +337,7 @@ namespace MagicalCompetition.Editor
             var textComp = go.AddComponent<Text>();
             textComp.text = text;
             textComp.fontSize = fontSize;
-            textComp.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            textComp.font = FontProvider.Regular;
             return textComp;
         }
 

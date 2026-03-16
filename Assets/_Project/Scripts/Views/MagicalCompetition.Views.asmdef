@@ -2,7 +2,8 @@
     "name": "MagicalCompetition.Views",
     "rootNamespace": "MagicalCompetition.Views",
     "references": [
-        "MagicalCompetition.Core"
+        "MagicalCompetition.Core",
+        "MagicalCompetition.Utils"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -76,6 +76,9 @@ namespace MagicalCompetition.Views
 
         public int CardViewCount => _cardViews.Count;
 
+        /// <summary>選択中のCardViewリストを返す（内部リスト参照）。</summary>
+        public IReadOnlyList<CardView> CardViews => _cardViews;
+
         private void HandleCardClicked(CardView cardView)
         {
             if (_selectedCards.Contains(cardView))

@@ -4,7 +4,8 @@
     "references": [
         "MagicalCompetition.Core",
         "MagicalCompetition.Controllers",
-        "MagicalCompetition.Views"
+        "MagicalCompetition.Views",
+        "MagicalCompetition.Utils"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

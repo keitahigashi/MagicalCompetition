@@ -24,7 +24,7 @@ namespace MagicalCompetition.Editor
             camGo.tag = "MainCamera";
             var cam = camGo.GetComponent<Camera>();
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(0.08f, 0.08f, 0.25f);
+            cam.backgroundColor = new Color(0.12f, 0.06f, 0.20f);
             cam.orthographic = true;
 
             // TitleUI（Canvas含むUIを全てAwake時に自動生成する）

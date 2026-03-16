@@ -121,20 +121,34 @@ namespace MagicalCompetition.Tests.EditMode
             Assert.IsTrue(player.IsReach);
         }
 
-        // ─── 8. Refill(既にリーチ): 何もしない ─────────────────────────────
+        // ─── 8. Refill(既にリーチ・山札あり): 手札を補充する ──────────────
 
         [Test]
-        public void Refill_AlreadyReach_DoesNothing()
+        public void Refill_AlreadyReach_WithDeck_StillRefills()
         {
-            var player = CreatePlayerWithDeck(5);
+            var player = CreatePlayerWithDeck(2);
             player.IsReach = true;
-            int originalDeckCount = player.Deck.Count;
-            int originalHandCount = player.Hand.Count;
+            // 山札2枚・手札0枚 → 2枚引いて手札2枚になる
 
             _drawSystem.Refill(player);
 
-            Assert.AreEqual(originalHandCount, player.Hand.Count);
-            Assert.AreEqual(originalDeckCount, player.Deck.Count);
+            Assert.AreEqual(2, player.Hand.Count);
+            Assert.AreEqual(0, player.Deck.Count);
+        }
+
+        // ─── 9. Refill(既にリーチ・山札なし): 何もしない ─────────────────
+
+        [Test]
+        public void Refill_AlreadyReach_EmptyDeck_DoesNothing()
+        {
+            var player = CreatePlayerWithDeck(0);
+            player.IsReach = true;
+            player.AddToHand(new Card(CardColor.Fire, 1));
+
+            _drawSystem.Refill(player);
+
+            Assert.AreEqual(1, player.Hand.Count);
+            Assert.AreEqual(0, player.Deck.Count);
         }
     }
 }

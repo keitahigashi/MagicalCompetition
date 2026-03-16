@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using MagicalCompetition.Core.Model;
+using MagicalCompetition.Utils;
 
 namespace MagicalCompetition.Views
 {
@@ -131,10 +132,7 @@ namespace MagicalCompetition.Views
             rt.offsetMax = Vector2.zero;
 
             _cardText = textGo.AddComponent<Text>();
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            if (font == null)
-                font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            _cardText.font = font;
+            _cardText.font = FontProvider.Regular;
             _cardText.fontSize = 10;
             _cardText.alignment = TextAnchor.MiddleCenter;
             _cardText.color = Color.white;
@@ -220,19 +218,18 @@ namespace MagicalCompetition.Views
 
         private IEnumerator MoveCoroutine(Vector3 target, float duration)
         {
-            var start = _rectTransform.anchoredPosition;
-            var end = (Vector2)target;
+            var start = transform.position;
             float elapsed = 0f;
 
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
-                _rectTransform.anchoredPosition = Vector2.Lerp(start, end, t);
+                transform.position = Vector3.Lerp(start, target, t);
                 yield return null;
             }
 
-            _rectTransform.anchoredPosition = end;
+            transform.position = target;
         }
 
         private IEnumerator FadeCoroutine(float targetAlpha, float duration)
@@ -249,6 +246,71 @@ namespace MagicalCompetition.Views
             }
 
             _canvasGroup.alpha = targetAlpha;
+        }
+
+        /// <summary>カード裏面を表示する（AIカード用）。</summary>
+        public void SetBackSprite(Sprite backSprite)
+        {
+            EnsureInit();
+            EnsureLayout();
+
+            if (_cardImage != null)
+            {
+                if (backSprite != null)
+                {
+                    _cardImage.sprite = backSprite;
+                    _cardImage.color = Color.white;
+                }
+                else
+                {
+                    _cardImage.color = new Color(0.3f, 0.3f, 0.6f);
+                }
+            }
+
+            if (_cardText != null)
+                _cardText.text = "";
+        }
+
+        /// <summary>裏面→表面のフリップアニメーションを再生する。</summary>
+        public void PlayFlipAnimation(Card card, Sprite faceSprite, float duration)
+        {
+            StartCoroutine(FlipCoroutine(card, faceSprite, duration));
+        }
+
+        /// <summary>ワールド座標での位置を返す。</summary>
+        public Vector3 WorldPosition => _rectTransform != null ? _rectTransform.position : transform.position;
+
+        private IEnumerator FlipCoroutine(Card card, Sprite faceSprite, float duration)
+        {
+            float half = duration * 0.5f;
+            float elapsed = 0f;
+            Vector3 baseScale = transform.localScale;
+
+            // 前半: X スケール 1 → 0（裏面が縮む）
+            while (elapsed < half)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / half);
+                float scaleX = Mathf.Lerp(1f, 0f, t);
+                transform.localScale = new Vector3(baseScale.x * scaleX, baseScale.y, baseScale.z);
+                yield return null;
+            }
+
+            // 中間: カード表面に切り替え
+            SetCard(card, faceSprite);
+
+            // 後半: X スケール 0 → 1（表面が開く）
+            elapsed = 0f;
+            while (elapsed < half)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / half);
+                float scaleX = Mathf.Lerp(0f, 1f, t);
+                transform.localScale = new Vector3(baseScale.x * scaleX, baseScale.y, baseScale.z);
+                yield return null;
+            }
+
+            transform.localScale = baseScale;
         }
 
         private void OnDestroy()

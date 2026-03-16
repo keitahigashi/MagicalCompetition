@@ -25,14 +25,10 @@ namespace MagicalCompetition.Core.Systems
 
         /// <summary>
         /// 手札が3枚になるまで山札から補充する。
-        /// リーチ状態の場合は何もしない。
         /// 山札が空になったらリーチ状態に移行する。
         /// </summary>
         public void Refill(PlayerState player)
         {
-            if (player.IsReach)
-                return;
-
             while (player.Hand.Count < HandSize && player.Deck.Count > 0)
                 DrawOne(player);
 

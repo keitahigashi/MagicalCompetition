@@ -183,24 +183,46 @@ namespace MagicalCompetition.UI
 
             var state = _gameController.State;
             int aiIndex = state.CurrentPlayerIndex - 1;
+            var aiView = (aiIndex >= 0 && aiIndex < _aiInfoViews.Length)
+                ? _aiInfoViews[aiIndex] : null;
             var action = _aiController.ExecuteTurn(state, _aiStrategy);
 
-            if (aiIndex >= 0 && aiIndex < _aiInfoViews.Length)
-                _aiInfoViews[aiIndex].HideThinking();
+            if (aiView != null) aiView.HideThinking();
 
             var playerName = $"AI{state.CurrentPlayerIndex}";
             string aiLog;
             if (action.Type == PlayType.Pass)
             {
+                // パスアニメーション（裏面のまま山札へ → 補充）
+                int handBefore = state.CurrentPlayer.Hand.Count;
+                yield return StartCoroutine(AnimateAIPass(aiView, action));
+
                 _gameController.ExecutePass(action);
-                aiLog = $"{playerName}:pass";
+
+                // 補充アニメーション
+                int drawn = state.CurrentPlayer.Hand.Count - (handBefore - action.Cards.Count);
+                yield return StartCoroutine(AnimateAIDraw(aiView, drawn));
+
+                aiLog = action.Cards.Count > 0
+                    ? $"{playerName}:pass(return:{string.Join(",", action.Cards.Select(c => FormatCard(c)))})"
+                    : $"{playerName}:pass";
             }
             else
             {
                 var fieldNumberBefore = state.Field.Number;
+                int handBefore = state.CurrentPlayer.Hand.Count;
+
+                // カード出しアニメーション（フリップ → 場札へ移動）
+                yield return StartCoroutine(AnimateAIPlay(aiView, action));
+
                 _gameController.ExecutePlayCards(action);
                 _gameController.ExecuteDraw();
                 _gameController.ExecuteCheckWin();
+
+                // 補充アニメーション
+                int drawn = state.CurrentPlayer.Hand.Count - (handBefore - action.Cards.Count);
+                yield return StartCoroutine(AnimateAIDraw(aiView, drawn));
+
                 aiLog = FormatPlayLog(playerName, action, fieldNumberBefore);
             }
             AddPlayLog(aiLog);
@@ -209,11 +231,116 @@ namespace MagicalCompetition.UI
             HandlePostAction();
         }
 
+        /// <summary>AIカード出しアニメーション: 手札の裏面カード→フリップ→場札へ移動。</summary>
+        private IEnumerator AnimateAIPlay(AIInfoView aiView, PlayAction action)
+        {
+            var canvas = FindAnyObjectByType<Canvas>();
+            if (canvas == null || aiView == null) yield break;
+
+            Vector3 fieldPos = _fieldView != null ? _fieldView.FieldWorldPosition : transform.position;
+
+            foreach (var card in action.Cards)
+            {
+                // AI手札の最後のカード裏面の位置を取得してから減らす
+                Vector3 startPos = aiView.LastCardBackWorldPosition;
+                aiView.RemoveCardBacks(1);
+
+                // 一時的なCardViewを生成（裏面表示）
+                var tempGo = CreateTempCard(canvas.transform, startPos);
+                var cardView = tempGo.GetComponent<CardView>();
+
+                var backSprite = CardSpriteLoader.GetBackSprite();
+                cardView.SetBackSprite(backSprite);
+
+                // フリップアニメーション（裏→表）
+                var faceSprite = CardSpriteLoader.GetSprite(card);
+                cardView.PlayFlipAnimation(card, faceSprite, 0.4f);
+                yield return new WaitForSeconds(0.45f);
+
+                // 場札へ移動
+                cardView.PlayMoveAnimation(fieldPos, 0.3f);
+                yield return new WaitForSeconds(0.35f);
+
+                Destroy(tempGo);
+            }
+        }
+
+        /// <summary>AIパスアニメーション: 手札の裏面カードが裏のまま山札方向へ移動。</summary>
+        private IEnumerator AnimateAIPass(AIInfoView aiView, PlayAction action)
+        {
+            var canvas = FindAnyObjectByType<Canvas>();
+            if (canvas == null || aiView == null) yield break;
+            if (action.Cards.Count == 0) yield break;
+
+            Vector3 deckPos = aiView.DeckWorldPosition;
+
+            foreach (var card in action.Cards)
+            {
+                Vector3 startPos = aiView.LastCardBackWorldPosition;
+                aiView.RemoveCardBacks(1);
+
+                // 一時的なCardView（裏面のまま）
+                var tempGo = CreateTempCard(canvas.transform, startPos);
+                var cardView = tempGo.GetComponent<CardView>();
+
+                var backSprite = CardSpriteLoader.GetBackSprite();
+                cardView.SetBackSprite(backSprite);
+
+                // 山札方向へ移動
+                cardView.PlayMoveAnimation(deckPos, 0.3f);
+                cardView.PlayFadeAnimation(0f, 0.3f);
+                yield return new WaitForSeconds(0.35f);
+
+                Destroy(tempGo);
+            }
+        }
+
+        /// <summary>AI手札補充アニメーション: 山札からカード裏面が手札に追加される。</summary>
+        private IEnumerator AnimateAIDraw(AIInfoView aiView, int drawCount)
+        {
+            if (aiView == null || drawCount <= 0) yield break;
+
+            for (int i = 0; i < drawCount; i++)
+            {
+                aiView.AddCardBacks(1);
+                yield return new WaitForSeconds(0.15f);
+            }
+        }
+
+        /// <summary>一時的なカードUIオブジェクトを生成する。</summary>
+        private GameObject CreateTempCard(Transform parent, Vector3 worldPos)
+        {
+            var go = new GameObject("TempCard", typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+            go.transform.position = worldPos;
+
+            var rt = go.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(60, 100);
+
+            go.AddComponent<CardView>();
+            return go;
+        }
+
         private void OnPlayButton()
         {
             if (!_inputController.CanConfirmPlay()) return;
 
+            // 操作を無効化してアニメーション中の二重操作を防ぐ
+            if (_gameUI != null)
+            {
+                _gameUI.SetPlayButtonEnabled(false);
+                _gameUI.SetPassButtonEnabled(false);
+            }
+
             var action = _inputController.ConfirmPlay();
+            StartCoroutine(ExecutePlayerPlay(action));
+        }
+
+        private IEnumerator ExecutePlayerPlay(PlayAction action)
+        {
+            // 選択カードのアニメーション（手札 → 場札移動）
+            yield return StartCoroutine(AnimatePlayerPlay(action));
+
             var fieldNumberBefore = _gameController.State.Field.Number;
             _gameController.ExecutePlayCards(action);
             _gameController.ExecuteDraw();
@@ -226,10 +353,40 @@ namespace MagicalCompetition.UI
             if (_gameController.State.CurrentPhase == GamePhase.End)
             {
                 ShowResult();
-                return;
+                yield break;
             }
 
             AdvanceToNextPlayer();
+        }
+
+        /// <summary>プレイヤーカードプレイのアニメーション（手札→場札移動）。</summary>
+        private IEnumerator AnimatePlayerPlay(PlayAction action)
+        {
+            if (_handView == null || _fieldView == null) yield break;
+
+            Vector3 fieldPos = _fieldView.FieldWorldPosition;
+
+            // 選択中のカードViewを見つける
+            var selectedViews = new List<CardView>();
+            var actionCards = new HashSet<Card>(action.Cards);
+            foreach (var cv in _handView.CardViews)
+            {
+                if (actionCards.Contains(cv.CardData))
+                    selectedViews.Add(cv);
+            }
+
+            // カードを1枚ずつ順番に場札へ移動
+            foreach (var cv in selectedViews)
+            {
+                // LayoutGroupから外してワールド座標で自由に動かす
+                var rt = cv.GetComponent<RectTransform>();
+                Vector3 worldPos = rt.position;
+                cv.transform.SetParent(cv.transform.root, true);
+                rt.position = worldPos;
+
+                cv.PlayMoveAnimation(fieldPos, 0.3f);
+                yield return new WaitForSeconds(0.35f);
+            }
         }
 
         private void OnPassButton()

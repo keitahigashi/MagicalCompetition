@@ -37,6 +37,17 @@ namespace MagicalCompetition.Views
             }
         }
 
+        /// <summary>場札カードのワールド座標を返す（アニメーション先）。</summary>
+        public Vector3 FieldWorldPosition
+        {
+            get
+            {
+                if (_fieldCardView != null)
+                    return _fieldCardView.WorldPosition;
+                return transform.position;
+            }
+        }
+
         private string GetColorName(CardColor color)
         {
             switch (color)

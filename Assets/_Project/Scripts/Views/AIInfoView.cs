@@ -79,6 +79,81 @@ namespace MagicalCompetition.Views
             }
         }
 
+        /// <summary>手札エリアのワールド座標を返す（アニメーション元）。</summary>
+        public Vector3 HandWorldPosition
+        {
+            get
+            {
+                if (_handContainer != null)
+                    return _handContainer.position;
+                return transform.position;
+            }
+        }
+
+        /// <summary>山札テキストのワールド座標を返す（パス時の移動先）。</summary>
+        public Vector3 DeckWorldPosition
+        {
+            get
+            {
+                if (_deckCountText != null)
+                    return _deckCountText.transform.position;
+                return transform.position;
+            }
+        }
+
+        /// <summary>手札裏面カードを指定枚数だけ即座に減らす（アニメーション用）。</summary>
+        public void RemoveCardBacks(int count)
+        {
+            for (int i = 0; i < count && _cardBacks.Count > 0; i++)
+            {
+                var last = _cardBacks[_cardBacks.Count - 1];
+                _cardBacks.RemoveAt(_cardBacks.Count - 1);
+                Destroy(last);
+            }
+        }
+
+        /// <summary>手札裏面カードを指定枚数だけ追加する（補充アニメーション用）。</summary>
+        public void AddCardBacks(int count)
+        {
+            if (_handContainer == null) return;
+            if (_backSprite == null)
+                _backSprite = CardSpriteLoader.GetBackSprite();
+
+            for (int i = 0; i < count; i++)
+            {
+                var go = new GameObject($"CardBack{_cardBacks.Count}", typeof(RectTransform));
+                go.transform.SetParent(_handContainer, false);
+
+                var img = go.AddComponent<Image>();
+                if (_backSprite != null)
+                {
+                    img.sprite = _backSprite;
+                    img.color = Color.white;
+                }
+                else
+                {
+                    img.color = new Color(0.3f, 0.3f, 0.6f);
+                }
+
+                var arf = go.AddComponent<AspectRatioFitter>();
+                arf.aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
+                arf.aspectRatio = 0.66f;
+
+                _cardBacks.Add(go);
+            }
+        }
+
+        /// <summary>最後の手札裏面カードのワールド座標を返す。</summary>
+        public Vector3 LastCardBackWorldPosition
+        {
+            get
+            {
+                if (_cardBacks.Count > 0)
+                    return _cardBacks[_cardBacks.Count - 1].transform.position;
+                return HandWorldPosition;
+            }
+        }
+
         /// <summary>思考中アイコンを表示する。</summary>
         public void ShowThinking()
         {
