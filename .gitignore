@@ -78,6 +78,9 @@ crashlytics-build.properties
 # Uncomment if you don't need the bundled examples:
 # /Assets/TextMesh Pro/Examples & Extras/
 
+# --- Screenshots (MCP/debug captures) ---
+Assets/Screenshots/
+
 # --- Documentation build output ---
 /docs/_site/
 /docs/_build/

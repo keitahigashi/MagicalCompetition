@@ -6,7 +6,8 @@
       "Bash(mkdir -p \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Resources/Fonts\" && cp \"D:/020_Work/05_environment/03_shared_assets/Fonts/Noto_Sans_JP/static/NotoSansJP-Regular.ttf\" \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Resources/Fonts/\" && cp \"D:/020_Work/05_environment/03_shared_assets/Fonts/Noto_Sans_JP/static/NotoSansJP-Bold.ttf\" \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Resources/Fonts/\" && cp \"D:/020_Work/05_environment/03_shared_assets/Fonts/Noto_Sans_JP/OFL.txt\" \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Resources/Fonts/NotoSansJP_LICENSE.txt\")",
       "Bash(cd \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Scripts/Editor\" && mkdir -p MagicalCompetition Tools && mv CardSpriteImporter.cs CardAtlasBuilder.cs CardDataGenerator.cs CardSpriteTableBuilder.cs TitleSceneBuilder.cs GameSceneBuilder.cs MagicalCompetition/ && mv WebGLBuildConfig.cs Tools/ && ls -R)",
       "Bash(cd \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Scripts/Editor\" && mv CardSpriteImporter.cs.meta CardAtlasBuilder.cs.meta CardDataGenerator.cs.meta CardSpriteTableBuilder.cs.meta TitleSceneBuilder.cs.meta GameSceneBuilder.cs.meta MagicalCompetition/ && mv WebGLBuildConfig.cs.meta Tools/ && ls -R)",
-      "Bash(claude mcp:*)"
+      "Bash(claude mcp:*)",
+      "Bash(cd \"C:/Dev/active/Unity/Magical Competition\" && rm -f Assets/Screenshots/screenshot-*.png Assets/Screenshots/screenshot-*.png.meta)"
     ]
   }
 }
