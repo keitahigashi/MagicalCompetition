@@ -16,7 +16,7 @@ namespace MagicalCompetition.Editor
             ("Wind",  "wind",  50),
         };
 
-        [MenuItem("Tools/MagicalCompetition/Build CardSpriteTable")]
+        [MenuItem("MagicalCompetition/Build CardSpriteTable")]
         public static void Build()
         {
             // Art/card 内の画像のテクスチャタイプを Sprite に一括変更

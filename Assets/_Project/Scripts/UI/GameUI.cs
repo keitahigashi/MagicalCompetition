@@ -19,6 +19,11 @@ namespace MagicalCompetition.UI
         public event Action OnPassButtonClicked;
         public event Action OnReturnConfirmClicked;
 
+        /// <summary>出すボタンへの参照（スタイリング用）。</summary>
+        internal Button _PlayButtonRef => _playButton;
+        /// <summary>パスボタンへの参照（スタイリング用）。</summary>
+        internal Button _PassButtonRef => _passButton;
+
         private void Awake()
         {
             if (_playButton != null)

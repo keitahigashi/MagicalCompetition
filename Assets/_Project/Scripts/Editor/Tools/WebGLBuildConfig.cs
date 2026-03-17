@@ -7,7 +7,7 @@ namespace MagicalCompetition.Editor
 {
     public static class WebGLBuildConfig
     {
-        [MenuItem("Tools/MagicalCompetition/Configure WebGL Settings")]
+        [MenuItem("Tools/Configure WebGL Settings")]
         public static void ConfigureWebGLSettings()
         {
             // プラットフォーム切り替え確認
@@ -43,7 +43,7 @@ namespace MagicalCompetition.Editor
             Debug.Log($"  Data Caching: Enabled");
         }
 
-        [MenuItem("Tools/MagicalCompetition/Build WebGL")]
+        [MenuItem("Tools/Build WebGL")]
         public static void BuildWebGL()
         {
             ConfigureWebGLSettings();

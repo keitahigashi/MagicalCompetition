@@ -151,7 +151,7 @@ namespace MagicalCompetition.Views
                 case CardColor.Light: return new Color(0.8f, 0.7f, 0.2f);
                 case CardColor.Earth: return new Color(0.3f, 0.6f, 0.2f);
                 case CardColor.Wind:  return new Color(0.5f, 0.3f, 0.7f);
-                default:              return new Color(0.5f, 0.5f, 0.5f);
+                default:              return new Color(0.25f, 0.18f, 0.40f);
             }
         }
 

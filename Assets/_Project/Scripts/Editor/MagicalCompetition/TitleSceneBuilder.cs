@@ -8,7 +8,7 @@ namespace MagicalCompetition.Editor
 {
     public static class TitleSceneBuilder
     {
-        [MenuItem("Tools/MagicalCompetition/Build TitleScene UI")]
+        [MenuItem("MagicalCompetition/Build TitleScene UI")]
         public static void BuildTitleSceneUI()
         {
             var scenePath = "Assets/_Project/Scenes/TitleScene.unity";

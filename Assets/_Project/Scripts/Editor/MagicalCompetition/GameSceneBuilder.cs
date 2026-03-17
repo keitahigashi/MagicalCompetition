@@ -11,7 +11,7 @@ namespace MagicalCompetition.Editor
 {
     public static class GameSceneBuilder
     {
-        [MenuItem("Tools/MagicalCompetition/Build GameScene UI")]
+        [MenuItem("MagicalCompetition/Build GameScene UI")]
         public static void BuildGameSceneUI()
         {
             // GameSceneを自動ロード

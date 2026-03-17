@@ -7,7 +7,7 @@
 | ゲーム名 | Magical Competition（原作: ソルカルコンペティション） |
 | エンジン | Unity 2022.3 LTS |
 | 言語 | C# |
-| モード | 1人用（対戦AI：Easy / Normal / Hard） |
+| モード | 1人用（対戦AI） |
 | アーキテクチャ | MVC + State Machine + ScriptableObject |
 
 ---

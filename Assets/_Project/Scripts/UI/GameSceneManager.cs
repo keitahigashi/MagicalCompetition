@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using MagicalCompetition.Controllers;
 using MagicalCompetition.Core.Model;
 using MagicalCompetition.Core.Systems;
 using MagicalCompetition.Core.AI;
+using MagicalCompetition.Utils;
 using MagicalCompetition.Views;
 
 namespace MagicalCompetition.UI
@@ -51,7 +53,11 @@ namespace MagicalCompetition.UI
             _fieldView = FindAnyObjectByType<FieldView>();
             _deckView = FindAnyObjectByType<DeckView>();
             _turnIndicator = FindAnyObjectByType<TurnIndicatorView>();
-            _resultDialog = FindAnyObjectByType<ResultDialogView>(FindObjectsInactive.Include);
+            // 既存のResultDialogを破棄して新規生成（デザイン改修版）
+            var existingResult = FindAnyObjectByType<ResultDialogView>(FindObjectsInactive.Include);
+            if (existingResult != null)
+                Destroy(existingResult.gameObject);
+            _resultDialog = CreateResultDialog();
             _gameUI = FindAnyObjectByType<GameUI>();
             _aiInfoViews = FindObjectsByType<AIInfoView>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
@@ -103,12 +109,37 @@ namespace MagicalCompetition.UI
                 };
             }
 
+            // UI見栄え適用
+            ApplyVisualTheme();
+
             // ゲーム開始
             _gameController.ExecuteSetup(_config);
             _gameController.ExecuteSelectFieldCard(CardColor.Any);
 
             UpdateAllViews();
             StartPlayerTurn();
+
+        }
+
+        private ResultDialogView CreateResultDialog()
+        {
+            var canvas = FindAnyObjectByType<Canvas>();
+            if (canvas == null) return null;
+
+            var go = new GameObject("ResultDialog", typeof(RectTransform));
+            go.transform.SetParent(canvas.transform, false);
+
+            // 全画面ストレッチ
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            // 最前面に配置
+            go.transform.SetAsLastSibling();
+
+            return go.AddComponent<ResultDialogView>();
         }
 
         private PlayLogView CreatePlayLogView()
@@ -134,6 +165,145 @@ namespace MagicalCompetition.UI
             Debug.Log(message);
             if (_playLogView != null)
                 _playLogView.AddLog(message);
+        }
+
+        /// <summary>GameScene全体の見栄えを整える（背景・ボタン・パネル）。</summary>
+        private void ApplyVisualTheme()
+        {
+            // --- カメラ背景色 ---
+            var cam = Camera.main ?? FindAnyObjectByType<Camera>();
+            if (cam != null)
+                cam.backgroundColor = UITheme.BgDeep;
+
+            var canvas = FindAnyObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            var canvasRT = canvas.GetComponent<RectTransform>();
+
+            // --- 全画面グラデーション背景 ---
+            CreateGradientBackground(canvasRT);
+
+            // --- PlayerArea 背景パネル ---
+            var playerAreaRT = _handView != null
+                ? _handView.GetComponent<RectTransform>()?.parent?.GetComponent<RectTransform>()
+                : null;
+            if (playerAreaRT != null)
+            {
+                var panelImg = playerAreaRT.GetComponent<Image>();
+                if (panelImg == null)
+                    panelImg = playerAreaRT.gameObject.AddComponent<Image>();
+                UITheme.ApplyRoundedRect(panelImg, UITheme.PanelDark);
+            }
+
+            // --- ボタンスタイル（名前で検索） ---
+            var allButtons = canvasRT.GetComponentsInChildren<Button>(true);
+            foreach (var btn in allButtons)
+            {
+                if (btn.name == "PlayButton")
+                    StyleButton(btn, UITheme.BtnPlay, UITheme.BtnPlayHover, UITheme.BtnPlayPress);
+                else if (btn.name == "PassButton")
+                    StyleButton(btn, UITheme.BtnPass, UITheme.BtnPassHover, UITheme.BtnPassPress);
+                else if (btn.name == "ConfirmButton")
+                    StyleButton(btn, UITheme.BtnPurple, UITheme.BtnPurpleHover, UITheme.BtnPurplePress);
+            }
+
+            // --- TurnIndicator パネル背景 ---
+            if (_turnIndicator != null)
+            {
+                var tiImg = _turnIndicator.GetComponent<Image>();
+                if (tiImg != null)
+                    UITheme.ApplyRoundedRect(tiImg, UITheme.PanelMid);
+            }
+
+            // --- FieldArea パネル背景 ---
+            if (_fieldView != null)
+            {
+                // FieldView自身にImageがなければ追加
+                var fvImg = _fieldView.GetComponent<Image>();
+                if (fvImg == null)
+                    fvImg = _fieldView.gameObject.AddComponent<Image>();
+                UITheme.ApplyRoundedRect(fvImg, new Color(0.10f, 0.06f, 0.20f, 0.7f));
+
+                // 子のImageをすべてテーマ色に（CardView関連は除外）
+                foreach (Transform child in _fieldView.transform)
+                {
+                    var childImg = child.GetComponent<Image>();
+                    if (childImg != null && child.GetComponent<CardView>() == null)
+                        childImg.color = new Color(0.15f, 0.10f, 0.28f, 0.9f);
+                }
+            }
+
+            // --- AIInfoArea 各パネル背景 ---
+            if (_aiInfoViews != null)
+            {
+                foreach (var aiView in _aiInfoViews)
+                {
+                    var aiImg = aiView.GetComponent<Image>();
+                    if (aiImg == null)
+                        aiImg = aiView.gameObject.AddComponent<Image>();
+                    UITheme.ApplyRoundedRect(aiImg, UITheme.PanelDark);
+                }
+            }
+        }
+
+        private void CreateGradientBackground(RectTransform canvasRT)
+        {
+            var bgGo = new GameObject("GradientBackground", typeof(RectTransform));
+            bgGo.transform.SetParent(canvasRT, false);
+            bgGo.transform.SetAsFirstSibling();
+
+            var bgRT = bgGo.GetComponent<RectTransform>();
+            bgRT.anchorMin = Vector2.zero;
+            bgRT.anchorMax = Vector2.one;
+            bgRT.offsetMin = Vector2.zero;
+            bgRT.offsetMax = Vector2.zero;
+
+            var bgImg = bgGo.AddComponent<RawImage>();
+            bgImg.texture = UITheme.GradientBgTexture;
+            bgImg.color = Color.white;
+            bgImg.raycastTarget = false;
+        }
+
+        private static void StyleButton(Button button, Color normal, Color hover, Color pressed)
+        {
+            if (button == null) return;
+
+            var img = button.GetComponent<Image>();
+            if (img != null)
+            {
+                img.sprite = UITheme.RoundedRectSmall;
+                img.type = Image.Type.Sliced;
+                img.color = normal;
+            }
+
+            // ColorBlockは相対的な明暗で制御
+            var cb = ColorBlock.defaultColorBlock;
+            cb.normalColor = Color.white;
+            cb.highlightedColor = new Color(hover.r / Mathf.Max(normal.r, 0.01f),
+                hover.g / Mathf.Max(normal.g, 0.01f),
+                hover.b / Mathf.Max(normal.b, 0.01f), 1f);
+            cb.pressedColor = new Color(pressed.r / Mathf.Max(normal.r, 0.01f),
+                pressed.g / Mathf.Max(normal.g, 0.01f),
+                pressed.b / Mathf.Max(normal.b, 0.01f), 1f);
+            cb.selectedColor = cb.highlightedColor;
+            cb.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+            cb.fadeDuration = 0.12f;
+            button.colors = cb;
+
+            // ボタン内テキストの色を白に統一
+            var text = button.GetComponentInChildren<Text>();
+            if (text != null)
+            {
+                text.color = UITheme.TextWhite;
+                text.fontStyle = FontStyle.Bold;
+            }
+
+            // Outline追加
+            var outline = button.GetComponent<Outline>();
+            if (outline == null)
+                outline = button.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 1f, 1f, 0.15f);
+            outline.effectDistance = new Vector2(1, -1);
         }
 
         private void ActivateAIPanels(int aiCount)
@@ -484,9 +654,15 @@ namespace MagicalCompetition.UI
         private void ShowResult()
         {
             var result = _gameController.Result;
-            Debug.Log($"[Game] END! Winner={result?.Winner?.PlayerId} Score={result?.Score} ResultDialog={_resultDialog != null}");
+            if (result != null)
+                ShowResult(result);
+        }
 
-            if (_resultDialog != null && result != null)
+        private void ShowResult(PlayResult result)
+        {
+            Debug.Log($"[Game] END! Winner={result.Winner?.PlayerId} Score={result.Score} ResultDialog={_resultDialog != null}");
+
+            if (_resultDialog != null)
             {
                 _resultDialog.gameObject.SetActive(true);
                 _resultDialog.Show(result);

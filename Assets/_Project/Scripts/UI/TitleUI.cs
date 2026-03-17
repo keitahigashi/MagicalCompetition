@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using MagicalCompetition.Controllers;
 using MagicalCompetition.Utils;
+using static MagicalCompetition.Utils.UITheme;
 
 namespace MagicalCompetition.UI
 {
@@ -87,22 +88,23 @@ namespace MagicalCompetition.UI
 
         private void BuildUI()
         {
-            // === テーマカラー定義 ===
-            var colorBgDeep     = new Color(0.12f, 0.06f, 0.20f);       // 深紫の背景
-            var colorBgMid      = new Color(0.18f, 0.10f, 0.30f);       // パネル背景
-            var colorGold       = new Color(0.85f, 0.70f, 0.30f);       // 金文字
-            var colorGoldBright = new Color(1.0f, 0.88f, 0.45f);        // 明るい金
-            var colorGoldDim    = new Color(0.55f, 0.45f, 0.20f);       // 暗い金（装飾線）
-            var colorPurpleBtn  = new Color(0.30f, 0.18f, 0.45f);       // 紫ボタン
-            var colorPurpleLight= new Color(0.40f, 0.25f, 0.55f);       // 紫ボタン(明)
-            var colorCream      = new Color(0.95f, 0.90f, 0.80f);       // クリーム白
+            // === テーマカラー（UITheme参照） ===
+            var colorBgDeep     = BgDeep;
+            var colorBgMid      = BgMid;
+            var colorGold       = Gold;
+            var colorGoldBright = GoldBright;
+            var colorGoldDim    = GoldDim;
+            var colorPurpleBtn  = BtnPurple;
+            var colorPurpleLight= BtnPurpleHover;
+            var colorCream      = TextCream;
 
             var canvas = GetComponent<Canvas>();
             if (canvas == null)
             {
                 canvas = gameObject.AddComponent<Canvas>();
-                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             }
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = Camera.main ?? FindAnyObjectByType<Camera>();
             if (GetComponent<CanvasScaler>() == null)
             {
                 var scaler = gameObject.AddComponent<CanvasScaler>();
@@ -116,12 +118,13 @@ namespace MagicalCompetition.UI
             var rt = GetComponent<RectTransform>();
             var font = FontProvider.Regular;
 
-            // === 背景（深紫グラデーション風） ===
+            // === 背景（縦グラデーション） ===
             var bgGo = MakeRect("Background", rt);
             Stretch(bgGo);
-            var bgImg = bgGo.AddComponent<Image>();
-            bgImg.color = colorBgDeep;
-            bgImg.raycastTarget = false;
+            var bgRaw = bgGo.AddComponent<RawImage>();
+            bgRaw.texture = GradientBgTexture;
+            bgRaw.color = Color.white;
+            bgRaw.raycastTarget = false;
 
             // === 上部装飾ライン ===
             var topLineGo = MakeRect("TopLine", rt);
@@ -192,9 +195,9 @@ namespace MagicalCompetition.UI
             panelRT.pivot = new Vector2(0.5f, 0.7f);
             panelRT.sizeDelta = new Vector2(0, 0);
 
-            // パネル背景
+            // パネル背景（角丸）
             var panelBg = panelGo.AddComponent<Image>();
-            panelBg.color = new Color(colorBgMid.r, colorBgMid.g, colorBgMid.b, 0.6f);
+            ApplyRoundedRect(panelBg, new Color(colorBgMid.r, colorBgMid.g, colorBgMid.b, 0.7f));
             panelBg.raycastTarget = false;
 
             var panelLayout = panelGo.AddComponent<VerticalLayoutGroup>();
@@ -374,21 +377,21 @@ namespace MagicalCompetition.UI
             le.flexibleWidth = prefW < 0 ? 1 : 0;
 
             var img = go.AddComponent<Image>();
-            img.color = bgColor;
+            ApplyRoundedRect(img, Color.white, true);
 
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = img;
+            btn.colors = MakeButtonColors(bgColor, bgColor * 1.2f, bgColor * 0.8f, BtnDisabled);
 
-            // ホバー/押下時のカラー
-            var colors = btn.colors;
-            colors.highlightedColor = bgColor * 1.2f;
-            colors.pressedColor = bgColor * 0.8f;
-            btn.colors = colors;
+            // 微細なアウトライン
+            var outline = go.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 1f, 1f, 0.12f);
+            outline.effectDistance = new Vector2(1, -1);
 
             var txt = MakeText("Text", go.transform, label, font, fontSize);
             Stretch(txt.gameObject);
             txt.alignment = TextAnchor.MiddleCenter;
-            txt.color = Color.white;
+            txt.color = TextWhite;
             txt.raycastTarget = false;
 
             return btn;
