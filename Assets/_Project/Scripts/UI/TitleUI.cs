@@ -54,6 +54,7 @@ namespace MagicalCompetition.UI
             {
                 _selectedAICount--;
                 UpdateCountText();
+                SoundManager.Instance.PlayButtonClick();
             }
         }
 
@@ -63,6 +64,7 @@ namespace MagicalCompetition.UI
             {
                 _selectedAICount++;
                 UpdateCountText();
+                SoundManager.Instance.PlayButtonClick();
             }
         }
 
@@ -74,6 +76,7 @@ namespace MagicalCompetition.UI
 
         private void HandleStartButton()
         {
+            SoundManager.Instance.PlayButtonClick();
             SceneController.AICount = _selectedAICount;
             OnGameStart?.Invoke(_selectedAICount);
             SceneManager.LoadScene("GameScene");

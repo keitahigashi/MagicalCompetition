@@ -90,6 +90,7 @@ namespace MagicalCompetition.Views
 
         private void HandleTitleButtonClick()
         {
+            SoundManager.Instance.PlayButtonClick();
             OnTitleButtonClicked?.Invoke();
         }
 
@@ -166,9 +167,8 @@ namespace MagicalCompetition.Views
             var go = new GameObject("Confetti", typeof(RectTransform));
             go.transform.SetParent(parent, false);
 
-            // ダイアログパネルの背面に配置（パネルの直前）
-            if (_dialogPanel != null)
-                go.transform.SetSiblingIndex(_dialogPanel.transform.GetSiblingIndex());
+            // ダイアログパネルの前面に配置
+            go.transform.SetAsLastSibling();
 
             var rt = go.GetComponent<RectTransform>();
             float startX = UnityEngine.Random.Range(-canvasW * 0.5f, canvasW * 0.5f);

@@ -84,9 +84,15 @@ namespace MagicalCompetition.UI
                 _handView.OnCardClicked += cv =>
                 {
                     if (cv.IsSelected)
+                    {
                         _inputController.SelectCard(cv.CardData);
+                        SoundManager.Instance.PlayCardSelect();
+                    }
                     else
+                    {
                         _inputController.DeselectCard(cv.CardData);
+                        SoundManager.Instance.PlayCardDeselect();
+                    }
 
                     // 出すボタンの有効/無効を更新
                     bool canPlay = _inputController.CanConfirmPlay();
@@ -320,6 +326,7 @@ namespace MagicalCompetition.UI
         {
             var state = _gameController.State;
             if (state.CurrentPhase == GamePhase.End) return;
+            SoundManager.Instance.PlayTurnStart();
 
             if (state.CurrentPlayer.IsHuman)
             {
@@ -425,6 +432,7 @@ namespace MagicalCompetition.UI
                 // フリップアニメーション（裏→表）
                 var faceSprite = CardSpriteLoader.GetSprite(card);
                 cardView.PlayFlipAnimation(card, faceSprite, 0.4f);
+                SoundManager.Instance.PlayCardFlip();
                 yield return new WaitForSeconds(0.45f);
 
                 // 場札へ移動
@@ -473,6 +481,7 @@ namespace MagicalCompetition.UI
             for (int i = 0; i < drawCount; i++)
             {
                 aiView.AddCardBacks(1);
+                SoundManager.Instance.PlayDraw();
                 yield return new WaitForSeconds(0.15f);
             }
         }
@@ -503,6 +512,7 @@ namespace MagicalCompetition.UI
             }
 
             var action = _inputController.ConfirmPlay();
+            SoundManager.Instance.PlayCardPlay();
             StartCoroutine(ExecutePlayerPlay(action));
         }
 
@@ -566,6 +576,7 @@ namespace MagicalCompetition.UI
                 _inputController.SelectCardToReturn(card);
 
             var action = _inputController.ConfirmPass();
+            SoundManager.Instance.PlayPass();
             _gameController.ExecutePass(action);
 
             var returnedCards = action.Cards;
@@ -661,6 +672,11 @@ namespace MagicalCompetition.UI
         private void ShowResult(PlayResult result)
         {
             Debug.Log($"[Game] END! Winner={result.Winner?.PlayerId} Score={result.Score} ResultDialog={_resultDialog != null}");
+
+            if (result.Winner != null && result.Winner.IsHuman)
+                SoundManager.Instance.PlayWin();
+            else
+                SoundManager.Instance.PlayLose();
 
             if (_resultDialog != null)
             {
