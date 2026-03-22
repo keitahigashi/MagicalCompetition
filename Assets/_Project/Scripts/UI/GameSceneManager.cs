@@ -35,6 +35,7 @@ namespace MagicalCompetition.UI
         private GameUI _gameUI;
         private AIInfoView[] _aiInfoViews;
         private PlayLogView _playLogView;
+        private bool _isProcessing;
 
         private void Start()
         {
@@ -299,7 +300,8 @@ namespace MagicalCompetition.UI
 
             if (state.CurrentPlayer.IsHuman)
             {
-                // プレイヤーターン
+                // プレイヤーターン — 入力受付開始
+                _isProcessing = false;
                 _inputController.WaitForInput(state.Field);
                 if (_turnIndicator != null)
                     _turnIndicator.UpdateTurn(state.CurrentPlayer);
@@ -329,9 +331,11 @@ namespace MagicalCompetition.UI
 
             var state = _gameController.State;
             int aiIndex = state.CurrentPlayerIndex - 1;
+            Debug.Log($"[AI] ExecuteAITurn START playerIndex={state.CurrentPlayerIndex} hand={state.CurrentPlayer.Hand.Count} deck={state.CurrentPlayer.Deck.Count}");
             var aiView = (aiIndex >= 0 && aiIndex < _aiInfoViews.Length)
                 ? _aiInfoViews[aiIndex] : null;
             var action = _aiController.ExecuteTurn(state, _aiStrategy);
+            Debug.Log($"[AI] DecideAction={action.Type} cards={action.Cards.Count}");
 
             if (aiView != null) aiView.HideThinking();
 
@@ -373,8 +377,11 @@ namespace MagicalCompetition.UI
             }
             AddPlayLog(aiLog);
 
+            Debug.Log($"[AI] before UpdateAllViews playerIndex={state.CurrentPlayerIndex}");
             UpdateAllViews();
+            Debug.Log($"[AI] before HandlePostAction phase={state.CurrentPhase}");
             HandlePostAction();
+            Debug.Log($"[AI] ExecuteAITurn END playerIndex={state.CurrentPlayerIndex}");
         }
 
         /// <summary>AIカード出しアニメーション: 手札の裏面カード→フリップ→場札へ移動。</summary>
@@ -471,7 +478,9 @@ namespace MagicalCompetition.UI
 
         private void OnPlayButton()
         {
+            if (_isProcessing) return;
             if (!_inputController.CanConfirmPlay()) return;
+            _isProcessing = true;
 
             // 操作を無効化してアニメーション中の二重操作を防ぐ
             if (_gameUI != null)
@@ -544,13 +553,27 @@ namespace MagicalCompetition.UI
 
         private void OnPassButton()
         {
+            if (_isProcessing) return;
+            _isProcessing = true;
+
+            Debug.Log("[Pass] OnPassButton START");
+
+            // 操作を無効化して連打による二重実行を防ぐ
+            if (_gameUI != null)
+            {
+                _gameUI.SetPlayButtonEnabled(false);
+                _gameUI.SetPassButtonEnabled(false);
+            }
+
             // 選択中のカードがあれば山札に戻すカードとして設定
             foreach (var card in _inputController.SelectedCards)
                 _inputController.SelectCardToReturn(card);
 
             var action = _inputController.ConfirmPass();
+            Debug.Log($"[Pass] ConfirmPass done, returnCards={action.Cards.Count}");
             SoundManager.Instance.PlayPass();
             _gameController.ExecutePass(action);
+            Debug.Log($"[Pass] ExecutePass done, phase={_gameController.State.CurrentPhase}");
 
             var returnedCards = action.Cards;
             string passLog;
@@ -565,8 +588,11 @@ namespace MagicalCompetition.UI
             }
             AddPlayLog(passLog);
 
+            Debug.Log("[Pass] before UpdateAllViews");
             UpdateAllViews();
+            Debug.Log("[Pass] before HandlePostAction");
             HandlePostAction();
+            Debug.Log("[Pass] OnPassButton END");
         }
 
         private void AdvanceToNextPlayer()
@@ -579,15 +605,18 @@ namespace MagicalCompetition.UI
         private void HandlePostAction()
         {
             var state = _gameController.State;
+            Debug.Log($"[HandlePostAction] phase={state.CurrentPhase} passCount={state.ConsecutivePassCount} currentPlayer={state.CurrentPlayerIndex}");
 
             if (state.CurrentPhase == GamePhase.End)
             {
+                Debug.Log("[HandlePostAction] → ShowResult");
                 ShowResult();
                 return;
             }
 
             if (state.CurrentPhase == GamePhase.AllPassReset)
             {
+                Debug.Log("[HandlePostAction] → AllPassReset");
                 _gameController.ExecuteAllPassReset();
                 _gameController.ExecuteSelectFieldCard(CardColor.Any);
                 UpdateAllViews();

@@ -59,9 +59,9 @@ namespace MagicalCompetition.Views
             rt.anchorMax = new Vector2(1f, 0f);
             rt.pivot = new Vector2(0f, 1f);
 
-            // 上限超過時は古いエントリを削除
+            // 上限超過時は古いエントリを削除（DestroyImmediateで即座に反映）
             while (_entryContainer.childCount > MaxLogLines)
-                Destroy(_entryContainer.GetChild(0).gameObject);
+                DestroyImmediate(_entryContainer.GetChild(0).gameObject);
 
             // 最下部にスクロール
             if (_scrollRect != null)

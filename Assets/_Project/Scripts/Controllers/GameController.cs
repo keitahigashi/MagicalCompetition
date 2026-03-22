@@ -205,5 +205,6 @@ namespace MagicalCompetition.Controllers
             StateMachine.TransitionTo(GamePhase.SelectFieldCard);
             State.CurrentPhase = GamePhase.SelectFieldCard;
         }
+
     }
 }
