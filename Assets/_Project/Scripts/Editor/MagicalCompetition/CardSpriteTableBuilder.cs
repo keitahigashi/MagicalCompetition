@@ -42,7 +42,7 @@ namespace MagicalCompetition.Editor
                 for (int number = 1; number <= 9; number++)
                 {
                     int fileNum = baseNum + number - 1;
-                    var path = $"Assets/_Project/Art/card/{fileNum:D3}_omote_card_stone_{fileLabel}{number}.jpg";
+                    var path = $"Assets/_Project/Art/card/{fileNum:D3}_omote_card_stone_{fileLabel}{number}.png";
                     var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
 
                     if (sprite == null)
@@ -60,10 +60,16 @@ namespace MagicalCompetition.Editor
             }
 
             // 裏面
-            var backPath = "Assets/_Project/Art/card/002_ura_card_back.jpg";
+            var backPath = "Assets/_Project/Art/card/060_ura_grimoire_card_back.png";
             table.backSprite = AssetDatabase.LoadAssetAtPath<Sprite>(backPath);
             if (table.backSprite == null)
                 Debug.LogWarning($"Back sprite not found: {backPath}");
+
+            // ニュートラル（初手・パス流れ用）
+            var neutralPath = "Assets/_Project/Art/card/Neutral_5.png";
+            table.neutralSprite = AssetDatabase.LoadAssetAtPath<Sprite>(neutralPath);
+            if (table.neutralSprite == null)
+                Debug.LogWarning($"Neutral sprite not found: {neutralPath}");
 
             // Resources フォルダに保存
             var resourcesDir = "Assets/_Project/Resources";

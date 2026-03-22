@@ -1,47 +1,56 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace MagicalCompetition.Utils
 {
     /// <summary>
     /// プロジェクト共通のUIテーマカラーとプロシージャルSprite生成ユーティリティ。
+    /// TitleScene と統一されたダークパープル＋ゴールド装飾パレット。
     /// </summary>
     public static class UITheme
     {
-        // === 背景 ===
-        public static readonly Color BgDeep       = new Color(0.08f, 0.04f, 0.16f);
-        public static readonly Color BgMid        = new Color(0.14f, 0.08f, 0.26f);
-        public static readonly Color BgLight      = new Color(0.18f, 0.12f, 0.32f);
+        // === 背景（TitleScene: #1A0A3A） ===
+        public static readonly Color BgDeep       = new Color(0.102f, 0.039f, 0.227f); // #1A0A3A
+        public static readonly Color BgMid        = new Color(0.176f, 0.106f, 0.369f); // #2D1B5E
+        public static readonly Color BgLight      = new Color(0.239f, 0.149f, 0.471f); // #3D2878
 
-        // === 金装飾 ===
-        public static readonly Color Gold         = new Color(0.85f, 0.70f, 0.30f);
-        public static readonly Color GoldBright   = new Color(1.0f, 0.88f, 0.45f);
+        // === 金装飾（TitleScene: #D4AF37） ===
+        public static readonly Color Gold         = new Color(0.831f, 0.686f, 0.216f); // #D4AF37
+        public static readonly Color GoldBright   = new Color(0.910f, 0.851f, 0.690f); // #E8D9B0
         public static readonly Color GoldDim      = new Color(0.55f, 0.45f, 0.20f);
 
-        // === ボタン ===
-        public static readonly Color BtnPlay      = new Color(0.20f, 0.55f, 0.35f);
-        public static readonly Color BtnPlayHover  = new Color(0.25f, 0.65f, 0.40f);
-        public static readonly Color BtnPlayPress  = new Color(0.15f, 0.42f, 0.28f);
+        // === ボタン — TitleScene統一パープル系 ===
+        // 出す: TitleScene のゲーム開始ボタン系 (#6A3DB8)
+        public static readonly Color BtnPlay      = new Color(0.416f, 0.239f, 0.722f); // #6A3DB8
+        public static readonly Color BtnPlayHover  = new Color(0.502f, 0.318f, 0.800f); // #8051CC
+        public static readonly Color BtnPlayPress  = new Color(0.318f, 0.176f, 0.561f); // #512D8F
 
-        public static readonly Color BtnPass      = new Color(0.55f, 0.25f, 0.25f);
-        public static readonly Color BtnPassHover  = new Color(0.65f, 0.30f, 0.30f);
-        public static readonly Color BtnPassPress  = new Color(0.42f, 0.18f, 0.18f);
+        // パス: やや暗めのパープル (#3D2878)
+        public static readonly Color BtnPass      = new Color(0.239f, 0.157f, 0.471f); // #3D2878
+        public static readonly Color BtnPassHover  = new Color(0.318f, 0.220f, 0.561f); // #51388F
+        public static readonly Color BtnPassPress  = new Color(0.176f, 0.110f, 0.369f); // #2D1C5E
 
-        public static readonly Color BtnPurple    = new Color(0.30f, 0.18f, 0.45f);
-        public static readonly Color BtnPurpleHover = new Color(0.40f, 0.25f, 0.55f);
-        public static readonly Color BtnPurplePress = new Color(0.22f, 0.12f, 0.35f);
+        // 確定: ゴールド系
+        public static readonly Color BtnPurple    = new Color(0.416f, 0.239f, 0.722f); // #6A3DB8
+        public static readonly Color BtnPurpleHover = new Color(0.502f, 0.318f, 0.800f);
+        public static readonly Color BtnPurplePress = new Color(0.318f, 0.176f, 0.561f);
 
         public static readonly Color BtnDisabled  = new Color(0.30f, 0.30f, 0.35f, 0.6f);
 
         // === テキスト ===
         public static readonly Color TextWhite    = new Color(0.95f, 0.92f, 0.88f);
-        public static readonly Color TextCream     = new Color(0.95f, 0.90f, 0.80f);
+        public static readonly Color TextCream     = new Color(0.910f, 0.851f, 0.690f); // #E8D9B0
+        public static readonly Color TextGold     = new Color(0.831f, 0.686f, 0.216f); // #D4AF37
 
-        // === パネル ===
-        public static readonly Color PanelDark    = new Color(0.06f, 0.03f, 0.12f, 0.75f);
-        public static readonly Color PanelMid     = new Color(0.12f, 0.08f, 0.22f, 0.85f);
+        // === パネル（TitleScene: #2D1B5E CC） ===
+        public static readonly Color PanelDark    = new Color(0.176f, 0.106f, 0.369f, 0.80f); // #2D1B5E CC
+        public static readonly Color PanelMid     = new Color(0.239f, 0.149f, 0.471f, 0.85f); // #3D2878 D9
+
+        // === ゴールドボーダー ===
+        public static readonly Color GoldBorder   = new Color(0.831f, 0.686f, 0.216f, 0.9f); // #D4AF37
 
         // === フィールド ===
-        public static readonly Color FieldHighlight = new Color(0.85f, 0.70f, 0.30f, 0.3f);
+        public static readonly Color FieldHighlight = new Color(0.831f, 0.686f, 0.216f, 0.3f); // Gold glow
 
         // === キャッシュ ===
         private static Sprite _roundedRect;
@@ -164,6 +173,17 @@ namespace MagicalCompetition.Utils
             image.sprite = small ? RoundedRectSmall : RoundedRect;
             image.type = UnityEngine.UI.Image.Type.Sliced;
             image.color = color;
+        }
+
+        /// <summary>ゴールドボーダーのOutlineを追加する（TitleScene統一デザイン）。</summary>
+        public static Outline AddGoldBorder(GameObject go, float distance = 2f)
+        {
+            var outline = go.GetComponent<Outline>();
+            if (outline == null)
+                outline = go.AddComponent<Outline>();
+            outline.effectColor = GoldBorder;
+            outline.effectDistance = new Vector2(distance, -distance);
+            return outline;
         }
 
         private static float GetRoundedRectAlpha(int x, int y, int w, int h, int r)

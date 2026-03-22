@@ -20,6 +20,7 @@ namespace MagicalCompetition.Views
 
         public List<Entry> entries = new List<Entry>();
         public Sprite backSprite;
+        public Sprite neutralSprite;
 
         private Dictionary<string, Sprite> _dict;
 

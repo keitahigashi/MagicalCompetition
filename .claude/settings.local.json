@@ -7,7 +7,11 @@
       "Bash(cd \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Scripts/Editor\" && mkdir -p MagicalCompetition Tools && mv CardSpriteImporter.cs CardAtlasBuilder.cs CardDataGenerator.cs CardSpriteTableBuilder.cs TitleSceneBuilder.cs GameSceneBuilder.cs MagicalCompetition/ && mv WebGLBuildConfig.cs Tools/ && ls -R)",
       "Bash(cd \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Scripts/Editor\" && mv CardSpriteImporter.cs.meta CardAtlasBuilder.cs.meta CardDataGenerator.cs.meta CardSpriteTableBuilder.cs.meta TitleSceneBuilder.cs.meta GameSceneBuilder.cs.meta MagicalCompetition/ && mv WebGLBuildConfig.cs.meta Tools/ && ls -R)",
       "Bash(claude mcp:*)",
-      "Bash(cd \"C:/Dev/active/Unity/Magical Competition\" && rm -f Assets/Screenshots/screenshot-*.png Assets/Screenshots/screenshot-*.png.meta)"
+      "Bash(cd \"C:/Dev/active/Unity/Magical Competition\" && rm -f Assets/Screenshots/screenshot-*.png Assets/Screenshots/screenshot-*.png.meta)",
+      "Bash(cd \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Art/PNG/\" && mv \"001_omote_カード_リスト.png\" \"001_omote_card_list.png\" && mv \"003_omote_カード_魔導書_黄.png\" \"003_omote_card_grimoire_yellow.png\" && mv \"004_omote_カード_魔導書_黒.png\" \"004_omote_card_grimoire_black.png\" && mv \"005_omote_カード_魔導書_紫.png\" \"005_omote_card_grimoire_purple.png\" && mv \"006_omote_カード_魔導書_青.png\" \"006_omote_card_grimoire_blue.png\" && mv \"007_omote_カード_魔導書_赤.png\" \"007_omote_card_grimoire_red.png\" && mv \"008_omote_カード_魔導書_白.png\" \"008_omote_card_grimoire_white.png\" && mv \"009_omote_カード_魔導書_緑.png\" \"009_omote_card_grimoire_green.png\")",
+      "Bash(cd \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Art/PNG/\" && mv \"060_ura_魔導書カード_裏面-.png\" \"060_ura_grimoire_card_back.png\" && mv \"レイヤー 0.png\" \"layer_0.png\")",
+      "Bash(cd \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Art/PNG/\" && for f in *ura*; do mv \"$f\" \"060_ura_grimoire_card_back.png\"; done && for f in レイヤー*; do mv \"$f\" \"layer_0.png\"; done)",
+      "Bash(rm \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Art/card/\"* && cp \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Art/card2/\"* \"C:/Dev/active/Unity/Magical Competition/Assets/_Project/Art/card/\")"
     ]
   }
 }

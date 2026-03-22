@@ -5,6 +5,7 @@ namespace MagicalCompetition.Utils
     /// <summary>
     /// 効果音をコードで動的生成・再生するシングルトン。
     /// 外部音源ファイル不要。AudioClipはすべてランタイムで波形合成する。
+    /// ファンタジー/魔法テーマの音色パレット。
     /// </summary>
     public class SoundManager : MonoBehaviour
     {
@@ -59,15 +60,15 @@ namespace MagicalCompetition.Utils
         private void GenerateAllClips()
         {
             _clipCardSelect   = GenerateCardSelect();
-            _clipCardDeselect = GenerateTone(440f, 0.06f, ToneType.Sine, 0.3f);
+            _clipCardDeselect = GenerateCardDeselect();
             _clipCardPlay     = GenerateCardPlay();
-            _clipCardFlip     = GenerateSweep(300f, 800f, 0.12f, 0.4f);
+            _clipCardFlip     = GenerateCardFlip();
             _clipPass         = GeneratePassSound();
             _clipButtonClick  = GenerateButtonClick();
-            _clipTurnStart    = GenerateChord(new[] { 440f, 554f }, 0.12f, 0.3f);
-            _clipWin          = GenerateFanfare();
-            _clipLose         = GenerateTone(220f, 0.4f, ToneType.Triangle, 0.4f, true);
-            _clipDraw         = GenerateSweep(600f, 400f, 0.1f, 0.3f);
+            _clipTurnStart    = GenerateTurnStart();
+            _clipWin          = GenerateWinFanfare();
+            _clipLose         = GenerateLoseSound();
+            _clipDraw         = GenerateDrawSound();
         }
 
         // ─── 公開API ─────────────────────────────────────
@@ -89,275 +90,375 @@ namespace MagicalCompetition.Utils
                 _sfxSource.PlayOneShot(clip);
         }
 
-        // ─── 波形生成 ─────────────────────────────────────
+        // ─── 波形合成ユーティリティ ─────────────────────────
 
-        private enum ToneType { Sine, Square, Triangle }
+        private static float Sin(float phase) => Mathf.Sin(2f * Mathf.PI * phase);
 
-        private static AudioClip GenerateTone(float freq, float duration, ToneType type,
-            float volume, bool fadeDown = false)
+        /// <summary>エンベロープ: アタック→サスティン→ディケイ。</summary>
+        private static float Envelope(float progress, float attack, float decayPower)
         {
-            int sampleCount = Mathf.CeilToInt(SampleRate * duration);
-            var clip = AudioClip.Create("tone", sampleCount, 1, SampleRate, false);
-            var data = new float[sampleCount];
-
-            for (int i = 0; i < sampleCount; i++)
-            {
-                float t = (float)i / SampleRate;
-                float phase = t * freq;
-                float sample;
-
-                switch (type)
-                {
-                    case ToneType.Square:
-                        sample = Mathf.Sin(2f * Mathf.PI * phase) >= 0 ? 1f : -1f;
-                        break;
-                    case ToneType.Triangle:
-                        sample = 2f * Mathf.Abs(2f * (phase - Mathf.Floor(phase + 0.5f))) - 1f;
-                        break;
-                    default:
-                        sample = Mathf.Sin(2f * Mathf.PI * phase);
-                        break;
-                }
-
-                // エンベロープ（Attack-Decay）
-                float env = 1f;
-                float attackTime = 0.005f;
-                float progress = (float)i / sampleCount;
-                if (t < attackTime)
-                    env = t / attackTime;
-                else
-                    env = 1f - (fadeDown ? progress * 0.7f : progress * progress);
-
-                data[i] = sample * volume * Mathf.Max(env, 0f);
-            }
-
-            clip.SetData(data, 0);
-            return clip;
+            if (progress < attack)
+                return progress / attack;
+            float decayProgress = (progress - attack) / (1f - attack);
+            return Mathf.Exp(-decayProgress * decayPower);
         }
 
-        private static AudioClip GenerateChord(float[] freqs, float duration, float volume)
+        /// <summary>シンプルなリバーブ風テイル（遅延加算）。</summary>
+        private static void AddReverbTail(float[] data, float delay, float decay)
         {
-            int sampleCount = Mathf.CeilToInt(SampleRate * duration);
-            var clip = AudioClip.Create("chord", sampleCount, 1, SampleRate, false);
-            var data = new float[sampleCount];
-            float ampPerVoice = volume / freqs.Length;
-
-            for (int i = 0; i < sampleCount; i++)
-            {
-                float t = (float)i / SampleRate;
-                float progress = (float)i / sampleCount;
-                float env = 1f - progress * progress;
-
-                float sample = 0f;
-                for (int f = 0; f < freqs.Length; f++)
-                    sample += Mathf.Sin(2f * Mathf.PI * freqs[f] * t);
-
-                data[i] = sample * ampPerVoice * Mathf.Max(env, 0f);
-            }
-
-            clip.SetData(data, 0);
-            return clip;
+            int delaySamples = Mathf.CeilToInt(SampleRate * delay);
+            for (int i = delaySamples; i < data.Length; i++)
+                data[i] += data[i - delaySamples] * decay;
         }
 
-        private static AudioClip GenerateSweep(float freqStart, float freqEnd, float duration, float volume)
-        {
-            int sampleCount = Mathf.CeilToInt(SampleRate * duration);
-            var clip = AudioClip.Create("sweep", sampleCount, 1, SampleRate, false);
-            var data = new float[sampleCount];
+        // ─── 個別サウンド生成 ────────────────────────────
 
-            float phase = 0f;
-            for (int i = 0; i < sampleCount; i++)
-            {
-                float t = (float)i / SampleRate;
-                float progress = (float)i / sampleCount;
-                float freq = Mathf.Lerp(freqStart, freqEnd, progress);
-                phase += freq / SampleRate;
-
-                float env = 1f - progress * progress;
-                data[i] = Mathf.Sin(2f * Mathf.PI * phase) * volume * Mathf.Max(env, 0f);
-            }
-
-            clip.SetData(data, 0);
-            return clip;
-        }
-
-        /// <summary>カード選択音（柔らかいポップ音、2音の上昇）。</summary>
+        /// <summary>カード選択: クリスタルチャイム（D6→F#6、倍音豊かで澄んだ音）。</summary>
         private static AudioClip GenerateCardSelect()
         {
-            float duration = 0.12f;
-            int sampleCount = Mathf.CeilToInt(SampleRate * duration);
-            var clip = AudioClip.Create("cardSelect", sampleCount, 1, SampleRate, false);
-            var data = new float[sampleCount];
+            float duration = 0.2f;
+            int count = Mathf.CeilToInt(SampleRate * duration);
+            var data = new float[count];
 
-            // 2音: E5(523) → G5(659) 木琴風
-            float freq1 = 523f, freq2 = 659f;
-            float splitTime = 0.05f;
+            float[] freqs = { 1175f, 1480f }; // D6, F#6
+            float splitTime = 0.07f;
             int splitSample = Mathf.CeilToInt(SampleRate * splitTime);
 
-            for (int i = 0; i < sampleCount; i++)
+            for (int i = 0; i < count; i++)
             {
                 float t = (float)i / SampleRate;
-                float progress = (float)i / sampleCount;
                 bool isSecond = i >= splitSample;
-                float freq = isSecond ? freq2 : freq1;
-                float localProgress = isSecond
-                    ? (float)(i - splitSample) / (sampleCount - splitSample)
+                float freq = isSecond ? freqs[1] : freqs[0];
+                float localP = isSecond
+                    ? (float)(i - splitSample) / (count - splitSample)
                     : (float)i / splitSample;
 
-                // 正弦波 + 軽い倍音（木琴風の減衰）
-                float sample = Mathf.Sin(2f * Mathf.PI * freq * t) * 0.7f
-                             + Mathf.Sin(2f * Mathf.PI * freq * 2f * t) * 0.2f
-                             + Mathf.Sin(2f * Mathf.PI * freq * 3f * t) * 0.1f;
+                // ベル風: 基音 + 非整数倍音でメタリックな響き
+                float sample = Sin(freq * t) * 0.5f
+                             + Sin(freq * 2.76f * t) * 0.2f
+                             + Sin(freq * 5.4f * t) * 0.1f;
 
-                // 各音の急速減衰エンベロープ
-                float env = Mathf.Exp(-localProgress * 5f);
-                data[i] = sample * 0.35f * env;
+                float env = Envelope(localP, 0.01f, 6f);
+                data[i] = sample * 0.3f * env;
             }
 
+            AddReverbTail(data, 0.03f, 0.15f);
+
+            var clip = AudioClip.Create("cardSelect", count, 1, SampleRate, false);
             clip.SetData(data, 0);
             return clip;
         }
 
-        /// <summary>カード出し音（華やかな上昇アルペジオ＋シュワ感）。</summary>
+        /// <summary>カード選択解除: 柔らかな下降ベル（F#5→D5）。</summary>
+        private static AudioClip GenerateCardDeselect()
+        {
+            float duration = 0.15f;
+            int count = Mathf.CeilToInt(SampleRate * duration);
+            var data = new float[count];
+
+            float[] freqs = { 740f, 587f }; // F#5, D5
+            int splitSample = count / 2;
+
+            for (int i = 0; i < count; i++)
+            {
+                float t = (float)i / SampleRate;
+                bool isSecond = i >= splitSample;
+                float freq = isSecond ? freqs[1] : freqs[0];
+                float localP = isSecond
+                    ? (float)(i - splitSample) / (count - splitSample)
+                    : (float)i / splitSample;
+
+                float sample = Sin(freq * t) * 0.6f
+                             + Sin(freq * 2.76f * t) * 0.15f;
+
+                float env = Envelope(localP, 0.01f, 5f);
+                data[i] = sample * 0.2f * env;
+            }
+
+            var clip = AudioClip.Create("cardDeselect", count, 1, SampleRate, false);
+            clip.SetData(data, 0);
+            return clip;
+        }
+
+        /// <summary>カードプレイ: 魔法詠唱風アルペジオ（D5→F#5→A5→D6、キラキラ残響）。</summary>
         private static AudioClip GenerateCardPlay()
         {
-            float noteLen = 0.06f;
-            float[] notes = { 392f, 523f, 659f, 784f }; // G4→C5→E5→G5
-            float tailLen = 0.1f;
-            int totalSamples = Mathf.CeilToInt(SampleRate * (noteLen * notes.Length + tailLen));
-            var clip = AudioClip.Create("cardPlay", totalSamples, 1, SampleRate, false);
+            float noteLen = 0.07f;
+            float[] notes = { 587f, 740f, 880f, 1175f }; // D5→F#5→A5→D6
+            float tail = 0.25f;
+            int totalSamples = Mathf.CeilToInt(SampleRate * (noteLen * notes.Length + tail));
             var data = new float[totalSamples];
 
             for (int n = 0; n < notes.Length; n++)
             {
                 int startSample = Mathf.CeilToInt(SampleRate * noteLen * n);
-                int noteSamples = Mathf.CeilToInt(SampleRate * (noteLen + tailLen));
+                int noteSamples = Mathf.CeilToInt(SampleRate * (noteLen + tail));
 
                 for (int i = 0; i < noteSamples && (startSample + i) < totalSamples; i++)
                 {
                     float t = (float)i / SampleRate;
                     float progress = (float)i / noteSamples;
 
-                    // 急アタック＋自然な減衰
-                    float env = Mathf.Exp(-progress * 6f);
-                    if (t < 0.003f) env *= t / 0.003f;
+                    float env = Envelope(progress, 0.005f, 4f);
 
-                    // 基音＋倍音（キラキラ感）
-                    float sample = Mathf.Sin(2f * Mathf.PI * notes[n] * t) * 0.6f
-                                 + Mathf.Sin(2f * Mathf.PI * notes[n] * 2f * t) * 0.25f
-                                 + Mathf.Sin(2f * Mathf.PI * notes[n] * 3f * t) * 0.15f;
+                    // ベル＋キラキラ倍音
+                    float f = notes[n];
+                    float sample = Sin(f * t) * 0.45f
+                                 + Sin(f * 2f * t) * 0.2f
+                                 + Sin(f * 3.17f * t) * 0.12f
+                                 + Sin(f * 5.43f * t) * 0.06f;
 
-                    // 後半の音ほど音量を少し上げる（クレシェンド感）
-                    float volScale = 0.8f + 0.2f * ((float)n / notes.Length);
-                    data[startSample + i] += sample * 0.4f * env * volScale;
+                    // 音量クレシェンド
+                    float vol = 0.7f + 0.3f * ((float)n / notes.Length);
+                    data[startSample + i] += sample * 0.35f * env * vol;
                 }
             }
 
+            AddReverbTail(data, 0.04f, 0.2f);
+            AddReverbTail(data, 0.09f, 0.1f);
+
+            var clip = AudioClip.Create("cardPlay", totalSamples, 1, SampleRate, false);
             clip.SetData(data, 0);
             return clip;
         }
 
-        /// <summary>パス音（柔らかい2音の下降フレーズ）。</summary>
+        /// <summary>カードフリップ: 風切り音＋軽いベルヒット。</summary>
+        private static AudioClip GenerateCardFlip()
+        {
+            float duration = 0.18f;
+            int count = Mathf.CeilToInt(SampleRate * duration);
+            var data = new float[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                float t = (float)i / SampleRate;
+                float progress = (float)i / count;
+
+                // ノイズベースのシュワ感（周波数変調で風切り）
+                float noiseEnv = Mathf.Exp(-progress * 8f);
+                float noise = (Mathf.PerlinNoise(t * 800f, 0f) * 2f - 1f) * 0.3f * noiseEnv;
+
+                // ベルヒット（中間付近で鳴る）
+                float bellT = Mathf.Max(0f, progress - 0.3f) / 0.7f;
+                float bellEnv = bellT > 0f ? Mathf.Exp(-bellT * 10f) : 0f;
+                float bell = Sin(880f * t) * 0.4f + Sin(880f * 2.76f * t) * 0.15f;
+
+                data[i] = (noise + bell * bellEnv) * 0.3f;
+            }
+
+            var clip = AudioClip.Create("cardFlip", count, 1, SampleRate, false);
+            clip.SetData(data, 0);
+            return clip;
+        }
+
+        /// <summary>パス: 低い共鳴音の下降（神秘的な見送り感）。</summary>
         private static AudioClip GeneratePassSound()
         {
-            float duration = 0.2f;
-            int sampleCount = Mathf.CeilToInt(SampleRate * duration);
-            var clip = AudioClip.Create("pass", sampleCount, 1, SampleRate, false);
-            var data = new float[sampleCount];
+            float duration = 0.3f;
+            int count = Mathf.CeilToInt(SampleRate * duration);
+            var data = new float[count];
 
-            // E5(659) → C5(523) 下降2音
-            float freq1 = 659f, freq2 = 523f;
-            int splitSample = sampleCount / 2;
-
-            for (int i = 0; i < sampleCount; i++)
+            for (int i = 0; i < count; i++)
             {
                 float t = (float)i / SampleRate;
-                bool isSecond = i >= splitSample;
-                float freq = isSecond ? freq2 : freq1;
-                float localProgress = isSecond
-                    ? (float)(i - splitSample) / (sampleCount - splitSample)
-                    : (float)i / splitSample;
+                float progress = (float)i / count;
 
-                // Triangle波（柔らかい音色）＋軽い倍音
-                float phase = t * freq;
-                float tri = 2f * Mathf.Abs(2f * (phase - Mathf.Floor(phase + 0.5f))) - 1f;
-                float sample = tri * 0.7f
-                             + Mathf.Sin(2f * Mathf.PI * freq * t) * 0.3f;
+                // 下降ピッチ (A4→D4)
+                float freq = Mathf.Lerp(440f, 294f, progress * progress);
 
-                float env = Mathf.Exp(-localProgress * 4f);
-                if (!isSecond && localProgress < 0.05f) env *= localProgress / 0.05f;
-                if (isSecond && localProgress < 0.03f) env *= localProgress / 0.03f;
+                // 柔らかい三角波＋倍音
+                float phase = 0f;
+                // 積算周波数でピッチ変化に対応
+                float sample = Sin(freq * t) * 0.5f;
+                float tri = 2f * Mathf.Abs(2f * ((freq * t) - Mathf.Floor(freq * t + 0.5f))) - 1f;
+                sample += tri * 0.3f;
 
-                data[i] = sample * 0.35f * env;
+                float env = Envelope(progress, 0.02f, 3f);
+                data[i] = sample * 0.25f * env;
             }
 
+            AddReverbTail(data, 0.05f, 0.15f);
+
+            var clip = AudioClip.Create("pass", count, 1, SampleRate, false);
             clip.SetData(data, 0);
             return clip;
         }
 
-        /// <summary>ボタンクリック音（柔らかい打鍵音、倍音付き）。</summary>
+        /// <summary>ボタンクリック: 魔法の水晶タップ音。</summary>
         private static AudioClip GenerateButtonClick()
         {
-            float duration = 0.08f;
-            int sampleCount = Mathf.CeilToInt(SampleRate * duration);
-            var clip = AudioClip.Create("buttonClick", sampleCount, 1, SampleRate, false);
-            var data = new float[sampleCount];
+            float duration = 0.1f;
+            int count = Mathf.CeilToInt(SampleRate * duration);
+            var data = new float[count];
 
-            float freq = 520f;
-            for (int i = 0; i < sampleCount; i++)
+            float freq = 1200f;
+            for (int i = 0; i < count; i++)
             {
                 float t = (float)i / SampleRate;
-                float progress = (float)i / sampleCount;
+                float progress = (float)i / count;
 
-                // Sine基音 + 高次倍音で「コッ」という質感
-                float sample = Mathf.Sin(2f * Mathf.PI * freq * t) * 0.5f
-                             + Mathf.Sin(2f * Mathf.PI * freq * 2.5f * t) * 0.25f
-                             + Mathf.Sin(2f * Mathf.PI * freq * 4f * t) * 0.15f;
+                // 高めの音で「キン」とした水晶感
+                float sample = Sin(freq * t) * 0.4f
+                             + Sin(freq * 1.5f * t) * 0.2f
+                             + Sin(freq * 3.07f * t) * 0.1f;
 
-                // 瞬間アタック＋急速減衰
-                float env = Mathf.Exp(-progress * 12f);
-                if (t < 0.002f) env *= t / 0.002f;
+                // 非常に速い減衰
+                float env = Mathf.Exp(-progress * 18f);
+                if (t < 0.001f) env *= t / 0.001f;
 
-                // 最後にノイズ成分を微量（打鍵感）
-                float noise = (Random.value * 2f - 1f) * 0.1f * Mathf.Exp(-progress * 20f);
-
-                data[i] = (sample * env + noise) * 0.3f;
+                data[i] = sample * 0.25f * env;
             }
 
+            var clip = AudioClip.Create("buttonClick", count, 1, SampleRate, false);
             clip.SetData(data, 0);
             return clip;
         }
 
-        /// <summary>勝利ファンファーレ（C-E-G-C上昇アルペジオ）。</summary>
-        private static AudioClip GenerateFanfare()
+        /// <summary>ターン開始: 神秘的なベルチャイム（D5+A5、教会ベル風）。</summary>
+        private static AudioClip GenerateTurnStart()
         {
-            float noteLen = 0.12f;
-            float[] notes = { 523f, 659f, 784f, 1047f };
-            int totalSamples = Mathf.CeilToInt(SampleRate * noteLen * notes.Length);
-            var clip = AudioClip.Create("fanfare", totalSamples, 1, SampleRate, false);
+            float duration = 0.35f;
+            int count = Mathf.CeilToInt(SampleRate * duration);
+            var data = new float[count];
+
+            float[] freqs = { 587f, 880f }; // D5, A5（完全五度）
+
+            for (int i = 0; i < count; i++)
+            {
+                float t = (float)i / SampleRate;
+                float progress = (float)i / count;
+                float env = Envelope(progress, 0.005f, 3.5f);
+
+                float sample = 0f;
+                foreach (var f in freqs)
+                {
+                    // ベル倍音（非整数倍音でメタリック感）
+                    sample += Sin(f * t) * 0.35f;
+                    sample += Sin(f * 2.76f * t) * 0.12f;
+                    sample += Sin(f * 5.4f * t) * 0.05f;
+                }
+
+                data[i] = sample * 0.25f * env;
+            }
+
+            AddReverbTail(data, 0.06f, 0.2f);
+
+            var clip = AudioClip.Create("turnStart", count, 1, SampleRate, false);
+            clip.SetData(data, 0);
+            return clip;
+        }
+
+        /// <summary>勝利: 壮大な魔法ファンファーレ（D→F#→A→D上昇、和音残響）。</summary>
+        private static AudioClip GenerateWinFanfare()
+        {
+            float noteLen = 0.15f;
+            float[] notes = { 587f, 740f, 880f, 1175f }; // D5→F#5→A5→D6
+            float tail = 0.4f;
+            int totalSamples = Mathf.CeilToInt(SampleRate * (noteLen * notes.Length + tail));
             var data = new float[totalSamples];
 
             for (int n = 0; n < notes.Length; n++)
             {
                 int startSample = Mathf.CeilToInt(SampleRate * noteLen * n);
-                int noteSamples = Mathf.CeilToInt(SampleRate * noteLen);
+                int noteSamples = Mathf.CeilToInt(SampleRate * (noteLen + tail));
                 bool isLast = n == notes.Length - 1;
 
                 for (int i = 0; i < noteSamples && (startSample + i) < totalSamples; i++)
                 {
                     float t = (float)i / SampleRate;
                     float progress = (float)i / noteSamples;
+
                     float env;
                     if (isLast)
-                        env = progress < 0.05f ? progress / 0.05f : 1f - progress * 0.3f;
+                        env = Envelope(progress, 0.01f, 1.5f); // 最終音は長く残る
                     else
-                        env = progress < 0.05f ? progress / 0.05f : 1f - progress * progress;
+                        env = Envelope(progress, 0.005f, 4f);
 
-                    float sample = Mathf.Sin(2f * Mathf.PI * notes[n] * t);
-                    data[startSample + i] += sample * 0.45f * Mathf.Max(env, 0f);
+                    float f = notes[n];
+                    // 豊かな倍音で壮大さ
+                    float sample = Sin(f * t) * 0.4f
+                                 + Sin(f * 2f * t) * 0.2f
+                                 + Sin(f * 3f * t) * 0.1f
+                                 + Sin(f * 4f * t) * 0.05f;
+
+                    // 5度のハーモニー追加（最終音）
+                    if (isLast)
+                        sample += Sin(f * 1.5f * t) * 0.15f;
+
+                    float vol = 0.6f + 0.4f * ((float)n / notes.Length);
+                    data[startSample + i] += sample * 0.35f * env * vol;
                 }
             }
 
+            AddReverbTail(data, 0.05f, 0.2f);
+            AddReverbTail(data, 0.11f, 0.12f);
+
+            var clip = AudioClip.Create("winFanfare", totalSamples, 1, SampleRate, false);
+            clip.SetData(data, 0);
+            return clip;
+        }
+
+        /// <summary>敗北: 暗い下降和音（Dm→減衰）。</summary>
+        private static AudioClip GenerateLoseSound()
+        {
+            float duration = 0.6f;
+            int count = Mathf.CeilToInt(SampleRate * duration);
+            var data = new float[count];
+
+            // D-F-A の短三和音、下降
+            float[] baseFreqs = { 294f, 349f, 440f }; // D4, F4, A4
+
+            for (int i = 0; i < count; i++)
+            {
+                float t = (float)i / SampleRate;
+                float progress = (float)i / count;
+
+                // ゆっくり下降するピッチ
+                float pitchMult = 1f - progress * 0.15f;
+                float env = Envelope(progress, 0.02f, 2f);
+
+                float sample = 0f;
+                foreach (var f in baseFreqs)
+                {
+                    float freq = f * pitchMult;
+                    sample += Sin(freq * t) * 0.3f;
+                    sample += Sin(freq * 2f * t) * 0.08f;
+                }
+
+                data[i] = sample * 0.3f * env;
+            }
+
+            AddReverbTail(data, 0.08f, 0.15f);
+
+            var clip = AudioClip.Create("lose", count, 1, SampleRate, false);
+            clip.SetData(data, 0);
+            return clip;
+        }
+
+        /// <summary>ドロー（カード補充）: 柔らかなページめくり風。</summary>
+        private static AudioClip GenerateDrawSound()
+        {
+            float duration = 0.12f;
+            int count = Mathf.CeilToInt(SampleRate * duration);
+            var data = new float[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                float t = (float)i / SampleRate;
+                float progress = (float)i / count;
+
+                // 上昇する軽いトーン
+                float freq = Mathf.Lerp(600f, 900f, progress);
+                float sample = Sin(freq * t) * 0.3f;
+
+                // ノイズ成分（紙っぽさ）
+                float noise = (Mathf.PerlinNoise(t * 600f, 0.5f) * 2f - 1f) * 0.2f;
+
+                float env = Envelope(progress, 0.005f, 8f);
+                data[i] = (sample + noise) * 0.2f * env;
+            }
+
+            var clip = AudioClip.Create("draw", count, 1, SampleRate, false);
             clip.SetData(data, 0);
             return clip;
         }

@@ -18,6 +18,7 @@ namespace MagicalCompetition.Views
 
         [SerializeField] private Image _cardImage;
         [SerializeField] private Text _cardText;
+        [SerializeField] private GameObject _selectHighlight;
 
         private Image _bgImage;
         private RectTransform _rectTransform;
@@ -53,7 +54,7 @@ namespace MagicalCompetition.Views
             _bgImage = GetComponent<Image>();
             if (_bgImage == null)
                 _bgImage = gameObject.AddComponent<Image>();
-            _bgImage.color = new Color(0.15f, 0.15f, 0.3f);
+            _bgImage.color = new Color(0f, 0f, 0f, 0f);
 
             // Button がなければ追加（クリック用）
             _button = GetComponent<Button>();
@@ -119,7 +120,7 @@ namespace MagicalCompetition.Views
             bgRT.offsetMin = Vector2.zero;
             bgRT.offsetMax = Vector2.zero;
             var bg = bgGo.AddComponent<Image>();
-            bg.color = new Color(0f, 0f, 0f, 0.5f);
+            bg.color = new Color(0f, 0f, 0f, 0f);
             bg.raycastTarget = false;
 
             // テキストを背景の子として配置
@@ -168,7 +169,7 @@ namespace MagicalCompetition.Views
             }
         }
 
-        /// <summary>選択状態を切り替える。選択時はカードが上に浮く。</summary>
+        /// <summary>選択状態を切り替える。選択時はカードが上に浮き、黄色ボーダーを表示する。</summary>
         public void SetSelected(bool selected)
         {
             EnsureInit();
@@ -186,6 +187,10 @@ namespace MagicalCompetition.Views
             }
             _isSelected = selected;
             _rectTransform.anchoredPosition = pos;
+
+            // 黄色ボーダーハイライト表示切替
+            if (_selectHighlight != null)
+                _selectHighlight.SetActive(selected);
         }
 
         /// <summary>操作可否を切り替える。無効時はグレーアウト表示。</summary>
@@ -263,7 +268,7 @@ namespace MagicalCompetition.Views
                 }
                 else
                 {
-                    _cardImage.color = new Color(0.3f, 0.3f, 0.6f);
+                    _cardImage.color = new Color(0f, 0f, 0f, 0f);
                 }
             }
 

@@ -14,6 +14,7 @@ namespace MagicalCompetition.Views
         [SerializeField] private Text _aiNameText;
         [SerializeField] private Text _handCountText;
         [SerializeField] private Text _deckCountText;
+        [SerializeField] private Text _totalCountText;
         [SerializeField] private GameObject _reachIcon;
         [SerializeField] private GameObject _thinkingIcon;
         [SerializeField] private Transform _handContainer;
@@ -32,6 +33,17 @@ namespace MagicalCompetition.Views
 
             if (_deckCountText != null)
                 _deckCountText.text = $"山札:{aiPlayer.Deck.Count}";
+
+            // トータルカード数（手札＋山札）表示
+            if (_totalCountText != null)
+            {
+                int totalCards = aiPlayer.Hand.Count + aiPlayer.Deck.Count;
+                _totalCountText.text = $"計:{totalCards}枚";
+                // 残少時（5枚以下）に警告色で強調
+                _totalCountText.color = totalCards <= 5
+                    ? new Color(1f, 0.42f, 0.42f) // #FF6B6B
+                    : new Color(0.7f, 0.7f, 0.7f);
+            }
 
             if (_reachIcon != null)
                 _reachIcon.SetActive(aiPlayer.IsReach);

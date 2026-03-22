@@ -26,6 +26,13 @@ namespace MagicalCompetition.Views
             return _table != null ? _table.backSprite : null;
         }
 
+        /// <summary>ニュートラル（初手・パス流れ）スプライトを返す。</summary>
+        public static Sprite GetNeutralSprite()
+        {
+            EnsureLoaded();
+            return _table != null ? _table.neutralSprite : null;
+        }
+
         private static void EnsureLoaded()
         {
             if (_table != null) return;

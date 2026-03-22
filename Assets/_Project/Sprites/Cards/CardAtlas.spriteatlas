@@ -11,9 +11,9 @@ SpriteAtlas:
     serializedVersion: 2
     textureSettings:
       serializedVersion: 2
-      anisoLevel: 1
-      compressionQuality: 50
-      maxTextureSize: 2048
+      anisoLevel: 0
+      compressionQuality: 0
+      maxTextureSize: 0
       textureCompression: 0
       filterMode: 1
       generateMipMaps: 0
@@ -70,14 +70,183 @@ SpriteAtlas:
       enableAlphaDilation: 0
     secondaryTextureSettings: {}
     variantMultiplier: 1
-    packables: []
+    packables:
+    - {fileID: 102900000, guid: cf06cca347cb7ab4580999ccdc098877, type: 3}
     bindAsDefault: 1
     isAtlasV2: 0
     cachedData: {fileID: 0}
-    packedSpriteRenderDataKeys: []
+    packedSpriteRenderDataKeys:
+    - 00ad61000f4a6eb468052b650bf95cdc: -4302369717882964109
+    - 4fe196902601f6043a91ec2ab347ecdc: 6847618175496840655
+    - 7ea751b07ce4f6649b61c5f16efe98f9: 6359387243825818109
+    - 4c8f16d01ac8fe042888c4ed9c0e23dd: 3229818624874330373
+    - dbb0e771849d09144afc08a54d97b9ca: -2752928472663061931
+    - 25f76381bd938c844a9e632f7463c917: -67392534020960108
+    - 0444c1e1dc825c641abe47246175d67d: -8633215593098829016
+    - bc164102a992e564c979e84188b31fa0: 586041874479698913
+    - be157a62ec24d5241895e003885bbd14: -8728786295153719487
+    - 0b0b22c26622ad6409cbc3516f330f1a: -5785926419244272565
+    - 71ccd2e2797725b49891a39258c8a949: -4104139567639992273
+    - 07d28613f0755ef4e8a41ceaf4e13f86: 579530788809952091
+    - 5e74af63744991d44a7093b1a70d36ec: -4559873483773630103
+    - 187e7373c4677084d9a5c15fbbd2a367: -1266321802322625995
+    - 7c922794c88087049a7673276e9d4d06: 5517831598266717609
+    - 7d4192b469227b1468983a99e81efdd9: 3984318426783622440
+    - 8bac89b45ae7fee449409abedf25c442: 5094731840464284191
+    - 2c973be4ebff1c944acabb05d4bb4b4c: 8034423561163598790
+    - db893de49b7df944c8b40cdb1f0a5474: -407114060614614282
+    - 2dd26055163f51d4a8ad7d31cbdb434b: -2010445428612131114
+    - eb4e3bf5ca4d62b43af0afeb13dc8844: 6425781902996880244
+    - 3cfa1ff5a65980e4f94b51c4ea26dd6f: -97691768308738849
+    - 06e07ba6c499ed546884525b929145eb: 1095041320856592837
+    - 01e5aec67022e954b8e7b94c7601ed3b: 5453817052871524226
+    - bc85bd0719f197342964a552ee81134a: 1488596897153726629
+    - a564ba17ada86234fa48627c7dc0b632: -3149381857447450856
+    - 403b7f17c97215645aa1c92c2432b527: -1701076977853036773
+    - 70fd8e27e33b12e48ab41b72d685d0bd: -8241963488272186548
+    - f53da747715a73347b94d17e69a491d4: 6218648253830024405
+    - 6ca377774d972e044afcc3343266c851: 5534808184612578791
+    - 9b142a972187e7a4895fac5464400990: 4267727324910433003
+    - a2ed0218ae0ff614dbee40ce8375b92f: 1691146000632333814
+    - 9b0ad528620a20e429ee4c5f52cfb9d8: -8955713188163136410
+    - 1e059a78cad17364b8f600c8e167227f: -888772917836954866
+    - 6542a9a8278ff2c4e8490e82335e279a: 427556512242736863
+    - fe503fe89c3c8b64d9c290812fac1228: -3123179028881135585
+    - ba3e0df84a9e97447a9fb73777b694af: -1696949634711908843
+    - 0bb3f46906edbda4a97def08b3b8a025: -4280208110922270479
+    - ca70ab99f1698294893cd25473c9558b: 2146506662676028763
+    - b4cdb9d964c2cef4d848685676e34084: -2391920748723439902
+    - b44ec7e937dc2be4fa905beca8d53a0b: -1650118282601734271
+    - 4138462aeb58c6d4e853b453e12578fb: 4785844951160826204
+    - ec918a5a07653ca4789c8afa7fd3fa0a: -5797723742409946601
+    - 855c40bab291d43428cb7daa3de6b606: 8405538242633931108
+    - aa2576ba95df2d740ab7a50ed6558492: -3239296896819828800
+    - f55f34db164aa154e914f234fcaba308: -8352542108856261492
+    - 89cbbe6c9f698f84da5daff50f034e6b: 7540518760646307704
+    - f27c6b2ddd7e00144ad216284bac08c8: -4230849196610733168
+    - e28a143d436b38249b316d8efc6a15b4: 6814739589484621094
+    - 1faab65d3d7160f4f8e2e8fd51243bcb: 7130840641749738893
+    - cbd0dcadbf157464eb071f6d14ad5766: 838792758426217416
+    - ea63ef5e951df574a9a27b87d51e8f02: 5481969878773340510
+    - ea3a976ebd1a2a6428676c63ba00735c: 326332982979274856
+    - 75a5b09e3a20dcb49b7e47dfe9bf0a03: 4213216609745643163
+    - 9a4e1caecfca94b44a75c7d9ec7fb461: -2722428623321867892
+    - e4b1d3cf6374ae54daa9e209cd625042: 6240190425733408199
   m_MasterAtlas: {fileID: 0}
-  m_PackedSprites: []
-  m_PackedSpriteNamesToIndex: []
+  m_PackedSprites:
+  - {fileID: -4302369717882964109, guid: 00ad61000f4a6eb468052b650bf95cdc, type: 3}
+  - {fileID: 6847618175496840655, guid: 4fe196902601f6043a91ec2ab347ecdc, type: 3}
+  - {fileID: 6359387243825818109, guid: 7ea751b07ce4f6649b61c5f16efe98f9, type: 3}
+  - {fileID: 3229818624874330373, guid: 4c8f16d01ac8fe042888c4ed9c0e23dd, type: 3}
+  - {fileID: -2752928472663061931, guid: dbb0e771849d09144afc08a54d97b9ca, type: 3}
+  - {fileID: -67392534020960108, guid: 25f76381bd938c844a9e632f7463c917, type: 3}
+  - {fileID: -8633215593098829016, guid: 0444c1e1dc825c641abe47246175d67d, type: 3}
+  - {fileID: 586041874479698913, guid: bc164102a992e564c979e84188b31fa0, type: 3}
+  - {fileID: -8728786295153719487, guid: be157a62ec24d5241895e003885bbd14, type: 3}
+  - {fileID: -5785926419244272565, guid: 0b0b22c26622ad6409cbc3516f330f1a, type: 3}
+  - {fileID: -4104139567639992273, guid: 71ccd2e2797725b49891a39258c8a949, type: 3}
+  - {fileID: 579530788809952091, guid: 07d28613f0755ef4e8a41ceaf4e13f86, type: 3}
+  - {fileID: -4559873483773630103, guid: 5e74af63744991d44a7093b1a70d36ec, type: 3}
+  - {fileID: -1266321802322625995, guid: 187e7373c4677084d9a5c15fbbd2a367, type: 3}
+  - {fileID: 5517831598266717609, guid: 7c922794c88087049a7673276e9d4d06, type: 3}
+  - {fileID: 3984318426783622440, guid: 7d4192b469227b1468983a99e81efdd9, type: 3}
+  - {fileID: 5094731840464284191, guid: 8bac89b45ae7fee449409abedf25c442, type: 3}
+  - {fileID: 8034423561163598790, guid: 2c973be4ebff1c944acabb05d4bb4b4c, type: 3}
+  - {fileID: -407114060614614282, guid: db893de49b7df944c8b40cdb1f0a5474, type: 3}
+  - {fileID: -2010445428612131114, guid: 2dd26055163f51d4a8ad7d31cbdb434b, type: 3}
+  - {fileID: 6425781902996880244, guid: eb4e3bf5ca4d62b43af0afeb13dc8844, type: 3}
+  - {fileID: -97691768308738849, guid: 3cfa1ff5a65980e4f94b51c4ea26dd6f, type: 3}
+  - {fileID: 1095041320856592837, guid: 06e07ba6c499ed546884525b929145eb, type: 3}
+  - {fileID: 5453817052871524226, guid: 01e5aec67022e954b8e7b94c7601ed3b, type: 3}
+  - {fileID: 1488596897153726629, guid: bc85bd0719f197342964a552ee81134a, type: 3}
+  - {fileID: -3149381857447450856, guid: a564ba17ada86234fa48627c7dc0b632, type: 3}
+  - {fileID: -1701076977853036773, guid: 403b7f17c97215645aa1c92c2432b527, type: 3}
+  - {fileID: -8241963488272186548, guid: 70fd8e27e33b12e48ab41b72d685d0bd, type: 3}
+  - {fileID: 6218648253830024405, guid: f53da747715a73347b94d17e69a491d4, type: 3}
+  - {fileID: 5534808184612578791, guid: 6ca377774d972e044afcc3343266c851, type: 3}
+  - {fileID: 4267727324910433003, guid: 9b142a972187e7a4895fac5464400990, type: 3}
+  - {fileID: 1691146000632333814, guid: a2ed0218ae0ff614dbee40ce8375b92f, type: 3}
+  - {fileID: -8955713188163136410, guid: 9b0ad528620a20e429ee4c5f52cfb9d8, type: 3}
+  - {fileID: -888772917836954866, guid: 1e059a78cad17364b8f600c8e167227f, type: 3}
+  - {fileID: 427556512242736863, guid: 6542a9a8278ff2c4e8490e82335e279a, type: 3}
+  - {fileID: -3123179028881135585, guid: fe503fe89c3c8b64d9c290812fac1228, type: 3}
+  - {fileID: -1696949634711908843, guid: ba3e0df84a9e97447a9fb73777b694af, type: 3}
+  - {fileID: -4280208110922270479, guid: 0bb3f46906edbda4a97def08b3b8a025, type: 3}
+  - {fileID: 2146506662676028763, guid: ca70ab99f1698294893cd25473c9558b, type: 3}
+  - {fileID: -2391920748723439902, guid: b4cdb9d964c2cef4d848685676e34084, type: 3}
+  - {fileID: -1650118282601734271, guid: b44ec7e937dc2be4fa905beca8d53a0b, type: 3}
+  - {fileID: 4785844951160826204, guid: 4138462aeb58c6d4e853b453e12578fb, type: 3}
+  - {fileID: -5797723742409946601, guid: ec918a5a07653ca4789c8afa7fd3fa0a, type: 3}
+  - {fileID: 8405538242633931108, guid: 855c40bab291d43428cb7daa3de6b606, type: 3}
+  - {fileID: -3239296896819828800, guid: aa2576ba95df2d740ab7a50ed6558492, type: 3}
+  - {fileID: -8352542108856261492, guid: f55f34db164aa154e914f234fcaba308, type: 3}
+  - {fileID: 7540518760646307704, guid: 89cbbe6c9f698f84da5daff50f034e6b, type: 3}
+  - {fileID: -4230849196610733168, guid: f27c6b2ddd7e00144ad216284bac08c8, type: 3}
+  - {fileID: 6814739589484621094, guid: e28a143d436b38249b316d8efc6a15b4, type: 3}
+  - {fileID: 7130840641749738893, guid: 1faab65d3d7160f4f8e2e8fd51243bcb, type: 3}
+  - {fileID: 838792758426217416, guid: cbd0dcadbf157464eb071f6d14ad5766, type: 3}
+  - {fileID: 5481969878773340510, guid: ea63ef5e951df574a9a27b87d51e8f02, type: 3}
+  - {fileID: 326332982979274856, guid: ea3a976ebd1a2a6428676c63ba00735c, type: 3}
+  - {fileID: 4213216609745643163, guid: 75a5b09e3a20dcb49b7e47dfe9bf0a03, type: 3}
+  - {fileID: -2722428623321867892, guid: 9a4e1caecfca94b44a75c7d9ec7fb461, type: 3}
+  - {fileID: 6240190425733408199, guid: e4b1d3cf6374ae54daa9e209cd625042, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - 022_omote_card_stone_light3_0
+  - 003_omote_card_grimoire_yellow_0
+  - 048_omote_card_stone_earth9_0
+  - 035_omote_card_stone_fire6_0
+  - layer_0_0
+  - 054_omote_card_stone_wind5_0
+  - 008_omote_card_grimoire_white_0
+  - 038_omote_card_stone_fire9_0
+  - 016_omote_card_stone_water7_0
+  - 010_omote_card_stone_water1_0
+  - 021_omote_card_stone_light2_0
+  - 046_omote_card_stone_earth7_0
+  - 018_omote_card_stone_water9_0
+  - 043_omote_card_stone_earth4_0
+  - 023_omote_card_stone_light4_0
+  - 053_omote_card_stone_wind4_0
+  - 058_omote_card_stone_wind9_0
+  - 025_omote_card_stone_light6_0
+  - 017_omote_card_stone_water8_0
+  - 006_omote_card_grimoire_blue_0
+  - 047_omote_card_stone_earth8_0
+  - 056_omote_card_stone_wind7_0
+  - 044_omote_card_stone_earth5_0
+  - 001_omote_card_list_0
+  - 015_omote_card_stone_water6_0
+  - 013_omote_card_stone_water4_0
+  - 004_omote_card_grimoire_black_0
+  - 007_omote_card_grimoire_red_0
+  - 060_ura_grimoire_card_back_0
+  - 055_omote_card_stone_wind6_0
+  - 027_omote_card_stone_light8_0
+  - 030_omote_card_stone_fire1_0
+  - 014_omote_card_stone_water5_0
+  - 011_omote_card_stone_water2_0
+  - 005_omote_card_grimoire_purple_0
+  - 009_omote_card_grimoire_green_0
+  - 040_omote_card_stone_earth1_0
+  - 041_omote_card_stone_earth2_0
+  - 012_omote_card_stone_water3_0
+  - 033_omote_card_stone_fire4_0
+  - 034_omote_card_stone_fire5_0
+  - 024_omote_card_stone_light5_0
+  - 050_omote_card_stone_wind1_0
+  - 028_omote_card_stone_light9_0
+  - 042_omote_card_stone_earth3_0
+  - 020_omote_card_stone_light1_0
+  - 051_omote_card_stone_wind2_0
+  - 031_omote_card_stone_fire2_0
+  - 052_omote_card_stone_wind3_0
+  - 057_omote_card_stone_wind8_0
+  - 045_omote_card_stone_earth6_0
+  - 026_omote_card_stone_light7_0
+  - Neutral_5_0
+  - 036_omote_card_stone_fire7_0
+  - 037_omote_card_stone_fire8_0
+  - 032_omote_card_stone_fire3_0
   m_RenderDataMap: {}
   m_Tag: CardAtlas
   m_IsVariant: 0

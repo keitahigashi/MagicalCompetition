@@ -61,8 +61,8 @@ namespace MagicalCompetition.UI
             _gameUI = FindAnyObjectByType<GameUI>();
             _aiInfoViews = FindObjectsByType<AIInfoView>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
-            // プレイログ生成（Canvas左側に配置）
-            _playLogView = CreatePlayLogView();
+            // プレイログ取得（GameSceneBuilderでEditor構築済み）
+            _playLogView = FindAnyObjectByType<PlayLogView>();
 
             // AI情報パネルを人数分だけ表示
             ActivateAIPanels(aiCount);
@@ -148,24 +148,6 @@ namespace MagicalCompetition.UI
             return go.AddComponent<ResultDialogView>();
         }
 
-        private PlayLogView CreatePlayLogView()
-        {
-            // Canvasを検索
-            var canvas = FindAnyObjectByType<Canvas>();
-            if (canvas == null) return null;
-
-            var go = new GameObject("PlayLogView", typeof(RectTransform));
-            go.transform.SetParent(canvas.transform, false);
-
-            var rt = go.GetComponent<RectTransform>();
-            rt.anchorMin = new Vector2(0f, 0.3f);
-            rt.anchorMax = new Vector2(0.22f, 0.78f);
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
-
-            return go.AddComponent<PlayLogView>();
-        }
-
         private void AddPlayLog(string message)
         {
             Debug.Log(message);
@@ -173,7 +155,7 @@ namespace MagicalCompetition.UI
                 _playLogView.AddLog(message);
         }
 
-        /// <summary>GameScene全体の見栄えを整える（背景・ボタン・パネル）。</summary>
+        /// <summary>GameScene全体の見栄えを整える（TitleScene統一デザイン）。</summary>
         private void ApplyVisualTheme()
         {
             // --- カメラ背景色 ---
@@ -185,21 +167,6 @@ namespace MagicalCompetition.UI
             if (canvas == null) return;
 
             var canvasRT = canvas.GetComponent<RectTransform>();
-
-            // --- 全画面グラデーション背景 ---
-            CreateGradientBackground(canvasRT);
-
-            // --- PlayerArea 背景パネル ---
-            var playerAreaRT = _handView != null
-                ? _handView.GetComponent<RectTransform>()?.parent?.GetComponent<RectTransform>()
-                : null;
-            if (playerAreaRT != null)
-            {
-                var panelImg = playerAreaRT.GetComponent<Image>();
-                if (panelImg == null)
-                    panelImg = playerAreaRT.gameObject.AddComponent<Image>();
-                UITheme.ApplyRoundedRect(panelImg, UITheme.PanelDark);
-            }
 
             // --- ボタンスタイル（名前で検索） ---
             var allButtons = canvasRT.GetComponentsInChildren<Button>(true);
@@ -213,33 +180,35 @@ namespace MagicalCompetition.UI
                     StyleButton(btn, UITheme.BtnPurple, UITheme.BtnPurpleHover, UITheme.BtnPurplePress);
             }
 
-            // --- TurnIndicator パネル背景 ---
+            // --- TurnIndicator パネル背景＋ゴールドボーダー ---
             if (_turnIndicator != null)
             {
                 var tiImg = _turnIndicator.GetComponent<Image>();
                 if (tiImg != null)
                     UITheme.ApplyRoundedRect(tiImg, UITheme.PanelMid);
+                UITheme.AddGoldBorder(_turnIndicator.gameObject, 1.5f);
             }
 
-            // --- FieldArea パネル背景 ---
+            // --- CenterCard_Root（FieldViewの親）パネル背景＋ゴールドボーダー ---
             if (_fieldView != null)
             {
-                // FieldView自身にImageがなければ追加
                 var fvImg = _fieldView.GetComponent<Image>();
                 if (fvImg == null)
                     fvImg = _fieldView.gameObject.AddComponent<Image>();
-                UITheme.ApplyRoundedRect(fvImg, new Color(0.10f, 0.06f, 0.20f, 0.7f));
+                UITheme.ApplyRoundedRect(fvImg, UITheme.PanelDark);
+                UITheme.AddGoldBorder(_fieldView.gameObject, 2f);
 
-                // 子のImageをすべてテーマ色に（CardView関連は除外）
+                // CardFrame背景をテーマ色に（CardView関連は除外）
                 foreach (Transform child in _fieldView.transform)
                 {
                     var childImg = child.GetComponent<Image>();
-                    if (childImg != null && child.GetComponent<CardView>() == null)
-                        childImg.color = new Color(0.15f, 0.10f, 0.28f, 0.9f);
+                    if (childImg != null && child.GetComponent<CardView>() == null
+                        && child.name != "GlowEffect" && child.name != "TurnLabel")
+                        childImg.color = UITheme.PanelMid;
                 }
             }
 
-            // --- AIInfoArea 各パネル背景 ---
+            // --- AIInfoArea 各パネル背景＋ゴールドボーダー ---
             if (_aiInfoViews != null)
             {
                 foreach (var aiView in _aiInfoViews)
@@ -248,26 +217,33 @@ namespace MagicalCompetition.UI
                     if (aiImg == null)
                         aiImg = aiView.gameObject.AddComponent<Image>();
                     UITheme.ApplyRoundedRect(aiImg, UITheme.PanelDark);
+                    UITheme.AddGoldBorder(aiView.gameObject, 1.5f);
                 }
             }
-        }
 
-        private void CreateGradientBackground(RectTransform canvasRT)
-        {
-            var bgGo = new GameObject("GradientBackground", typeof(RectTransform));
-            bgGo.transform.SetParent(canvasRT, false);
-            bgGo.transform.SetAsFirstSibling();
+            // --- LogPanel 背景＋ゴールドボーダー ---
+            if (_playLogView != null)
+            {
+                var logImg = _playLogView.GetComponent<Image>();
+                if (logImg != null)
+                {
+                    logImg.sprite = UITheme.RoundedRect;
+                    logImg.type = Image.Type.Sliced;
+                    // #2D1B5E alpha 0.80 — TitleScene パネルと同じ
+                    logImg.color = UITheme.PanelDark;
+                }
+                UITheme.AddGoldBorder(_playLogView.gameObject, 1.5f);
+            }
 
-            var bgRT = bgGo.GetComponent<RectTransform>();
-            bgRT.anchorMin = Vector2.zero;
-            bgRT.anchorMax = Vector2.one;
-            bgRT.offsetMin = Vector2.zero;
-            bgRT.offsetMax = Vector2.zero;
-
-            var bgImg = bgGo.AddComponent<RawImage>();
-            bgImg.texture = UITheme.GradientBgTexture;
-            bgImg.color = Color.white;
-            bgImg.raycastTarget = false;
+            // --- ActionPanel 背景＋ゴールドボーダー ---
+            if (_gameUI != null)
+            {
+                var actionImg = _gameUI.GetComponent<Image>();
+                if (actionImg == null)
+                    actionImg = _gameUI.gameObject.AddComponent<Image>();
+                UITheme.ApplyRoundedRect(actionImg, UITheme.PanelDark);
+                UITheme.AddGoldBorder(_gameUI.gameObject, 1.5f);
+            }
         }
 
         private static void StyleButton(Button button, Color normal, Color hover, Color pressed)
@@ -296,20 +272,16 @@ namespace MagicalCompetition.UI
             cb.fadeDuration = 0.12f;
             button.colors = cb;
 
-            // ボタン内テキストの色を白に統一
+            // ボタン内テキストの色をクリームゴールドに
             var text = button.GetComponentInChildren<Text>();
             if (text != null)
             {
-                text.color = UITheme.TextWhite;
+                text.color = UITheme.TextCream;
                 text.fontStyle = FontStyle.Bold;
             }
 
-            // Outline追加
-            var outline = button.GetComponent<Outline>();
-            if (outline == null)
-                outline = button.gameObject.AddComponent<Outline>();
-            outline.effectColor = new Color(1f, 1f, 1f, 0.15f);
-            outline.effectDistance = new Vector2(1, -1);
+            // ゴールドボーダー（TitleScene統一）
+            UITheme.AddGoldBorder(button.gameObject, 1.5f);
         }
 
         private void ActivateAIPanels(int aiCount)
@@ -642,8 +614,17 @@ namespace MagicalCompetition.UI
             // 場札（スプライト付き）
             if (_fieldView != null)
             {
-                var fieldCard = new Core.Model.Card(state.Field.Color, state.Field.Number);
-                _fieldView.UpdateField(state.Field, CardSpriteLoader.GetSprite(fieldCard));
+                Sprite fieldSprite;
+                if (state.Field.IsVirtual)
+                {
+                    fieldSprite = CardSpriteLoader.GetNeutralSprite();
+                }
+                else
+                {
+                    var fieldCard = new Core.Model.Card(state.Field.Color, state.Field.Number);
+                    fieldSprite = CardSpriteLoader.GetSprite(fieldCard);
+                }
+                _fieldView.UpdateField(state.Field, fieldSprite);
             }
 
             // デッキ・手札枚数
