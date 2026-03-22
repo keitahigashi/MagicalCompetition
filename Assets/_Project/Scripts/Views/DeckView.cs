@@ -49,7 +49,7 @@ namespace MagicalCompetition.Views
         public void UpdateCount(int count)
         {
             if (_countText != null)
-                _countText.text = $"山札: {count}枚";
+                _countText.text = $"山札: {count}";
 
             if (_reachIndicator != null)
                 _reachIndicator.SetActive(count == 0);
@@ -62,7 +62,7 @@ namespace MagicalCompetition.Views
         public void UpdateHandCount(int count)
         {
             if (_handCountText != null)
-                _handCountText.text = $"手札: {count}枚";
+                _handCountText.text = $"手札: {count}";
         }
 
         private void EnsureHandCountText()

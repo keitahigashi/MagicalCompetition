@@ -202,6 +202,13 @@ namespace MagicalCompetition.Views
             _canvasGroup.blocksRaycasts = enabled;
         }
 
+        /// <summary>背景Imageを透過にする（アニメーション用）。</summary>
+        public void SetBackgroundTransparent()
+        {
+            if (_bgImage != null)
+                _bgImage.color = new Color(0f, 0f, 0f, 0f);
+        }
+
         /// <summary>移動アニメーションを再生する。</summary>
         public void PlayMoveAnimation(Vector3 target, float duration)
         {

@@ -158,10 +158,24 @@ namespace MagicalCompetition.Editor
             aiLayoutGroup.childForceExpandHeight = true;
             aiLayoutGroup.padding = new RectOffset(10, 10, 5, 5);
 
-            // AI情報パネル×4
+            // AI情報パネル×4（Prefabからインスタンス化）
+            var aiPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/UI/AIInfo.prefab");
+            if (aiPrefab == null)
+            {
+                Debug.LogError("AIInfo.prefab not found at Assets/_Project/Prefabs/UI/AIInfo.prefab");
+                return;
+            }
+
             for (int i = 1; i <= 4; i++)
             {
-                var aiPanel = CreateAIInfoPanel($"AIInfo{i}", aiArea.transform, i);
+                var aiPanel = (GameObject)PrefabUtility.InstantiatePrefab(aiPrefab, aiArea.transform);
+                aiPanel.name = $"AIInfo{i}";
+
+                // AI名をインデックスに合わせて更新
+                var aiNameText = aiPanel.transform.Find("AINameText")?.GetComponent<Text>();
+                if (aiNameText != null)
+                    aiNameText.text = $"AI{i}";
+
                 if (i > 1) aiPanel.SetActive(false);
             }
         }
@@ -171,64 +185,45 @@ namespace MagicalCompetition.Editor
         // ============================================================
         private static void BuildCenterCardArea(Transform canvasTransform)
         {
+            // PlayerHand_Root(〜0.30)と重複しないよう下端0.32から
             var centerRoot = CreateUIObject("CenterCard_Root", canvasTransform);
-            SetAnchors(centerRoot, new Vector2(0.3f, 0.32f), new Vector2(0.7f, 0.80f), Vector2.zero, Vector2.zero);
+            SetAnchors(centerRoot, new Vector2(0.30f, 0.32f), new Vector2(0.70f, 0.78f), Vector2.zero, Vector2.zero);
 
-            // GlowEffect（パルスアニメーション用）
+            // GlowEffect（カード背後のグロー、パルスアニメーション用）
             var glowGo = CreateUIObject("GlowEffect", centerRoot.transform);
-            SetAnchors(glowGo, new Vector2(-0.05f, -0.05f), new Vector2(1.05f, 1.05f), Vector2.zero, Vector2.zero);
+            SetAnchors(glowGo, new Vector2(0.05f, 0.18f), new Vector2(0.95f, 0.98f), Vector2.zero, Vector2.zero);
             var glowImage = glowGo.AddComponent<Image>();
-            glowImage.color = new Color(0.831f, 0.686f, 0.216f, 0.4f); // #D4AF37 Gold glow
+            glowImage.color = new Color(0.831f, 0.686f, 0.216f, 0.3f); // #D4AF37 Gold glow
             glowImage.raycastTarget = false;
             var glowCanvasGroup = glowGo.AddComponent<CanvasGroup>();
-            glowCanvasGroup.alpha = 0.4f;
+            glowCanvasGroup.alpha = 0.3f;
 
-            // CardFrame（場札表示エリア）
-            var cardFrame = CreateUIObject("FieldCardBg", centerRoot.transform);
-            SetAnchors(cardFrame, new Vector2(0.2f, 0.15f), new Vector2(0.8f, 0.85f), Vector2.zero, Vector2.zero);
-            var fieldImage = cardFrame.AddComponent<Image>();
-            fieldImage.color = new Color(0.176f, 0.106f, 0.369f, 0.85f); // #2D1B5E
-
-            // CostBadge（左上コスト数値）
-            var costBadge = CreateTextObject("CostBadge", cardFrame.transform, "", 18);
-            SetAnchors(costBadge.gameObject, new Vector2(0f, 0.85f), new Vector2(0.25f, 1f), Vector2.zero, Vector2.zero);
-            costBadge.alignment = TextAnchor.MiddleCenter;
-            costBadge.color = new Color(0.831f, 0.686f, 0.216f); // #D4AF37 Gold
-            costBadge.fontStyle = FontStyle.Bold;
-            costBadge.raycastTarget = false;
-
-            // FieldCardView（カード画像）
-            var fieldCardView = CreateUIObject("FieldCardView", cardFrame.transform);
-            SetAnchors(fieldCardView, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            // FieldCardView（カード画像 — 上部80%、アスペクト比2:3維持）
+            var fieldCardView = CreateUIObject("FieldCardView", centerRoot.transform);
+            SetAnchors(fieldCardView, new Vector2(0.10f, 0.18f), new Vector2(0.90f, 0.98f), Vector2.zero, Vector2.zero);
             fieldCardView.AddComponent<Image>();
+            var arf = fieldCardView.AddComponent<AspectRatioFitter>();
+            arf.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            arf.aspectRatio = 0.66f; // カード比率 2:3
             var fieldCV = fieldCardView.AddComponent<CardView>();
-
-            // CardName（下部中央カード名）
-            var cardName = CreateTextObject("CardName", cardFrame.transform, "", 14);
-            SetAnchors(cardName.gameObject, new Vector2(0f, 0f), new Vector2(1f, 0.15f), Vector2.zero, Vector2.zero);
-            cardName.alignment = TextAnchor.MiddleCenter;
-            cardName.color = Color.white;
-            cardName.raycastTarget = false;
 
             // FieldView コンポーネント
             var fieldView = centerRoot.AddComponent<FieldView>();
             SetPrivateField(fieldView, "_fieldCardView", fieldCV);
             SetPrivateField(fieldView, "_glowEffect", glowGo);
-            SetPrivateField(fieldView, "_costBadgeText", costBadge);
-            SetPrivateField(fieldView, "_cardNameText", cardName);
             SetPrivateField(fieldView, "_glowCanvasGroup", glowCanvasGroup);
 
-            // TurnLabel（ターン表示）
+            // TurnLabel（カード下、重ならないよう0〜15%）
             var turnLabel = CreateUIObject("TurnLabel", centerRoot.transform);
-            SetAnchors(turnLabel, new Vector2(0.1f, 0f), new Vector2(0.9f, 0.12f), Vector2.zero, Vector2.zero);
+            SetAnchors(turnLabel, new Vector2(0.05f, 0f), new Vector2(0.95f, 0.15f), Vector2.zero, Vector2.zero);
 
-            var turnText = CreateTextObject("TurnText", turnLabel.transform, "あなたのターン", 28);
+            var turnText = CreateTextObject("TurnText", turnLabel.transform, "あなたのターン", 14);
             SetAnchors(turnText.gameObject, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             turnText.alignment = TextAnchor.MiddleCenter;
             turnText.color = Color.white;
 
             var turnBg = turnLabel.AddComponent<Image>();
-            turnBg.color = new Color(0.176f, 0.106f, 0.369f, 0.85f); // #2D1B5E
+            turnBg.color = new Color(0.176f, 0.106f, 0.369f, 0.70f); // #2D1B5E 半透過
 
             var turnView = turnLabel.AddComponent<TurnIndicatorView>();
             SetPrivateField(turnView, "_turnText", turnText);
@@ -240,7 +235,7 @@ namespace MagicalCompetition.Editor
         private static void BuildPlayerHandArea(Transform canvasTransform)
         {
             var handRoot = CreateUIObject("PlayerHand_Root", canvasTransform);
-            SetAnchors(handRoot, new Vector2(0.15f, 0.01f), new Vector2(0.72f, 0.30f), Vector2.zero, Vector2.zero);
+            SetAnchors(handRoot, new Vector2(0.22f, 0.01f), new Vector2(0.72f, 0.30f), Vector2.zero, Vector2.zero);
 
             // 手札コンテナ
             var handContainer = CreateUIObject("HandContainer", handRoot.transform);
@@ -256,14 +251,15 @@ namespace MagicalCompetition.Editor
             cardTemplate.AddComponent<Image>();
             var templateCV = cardTemplate.AddComponent<CardView>();
             var templateLayout = cardTemplate.AddComponent<LayoutElement>();
-            templateLayout.preferredWidth = 60;
+            templateLayout.preferredWidth = 80;
             templateLayout.preferredHeight = 100;
+            EditorUtility.SetDirty(templateLayout);
 
             // SelectHighlight（黄色ボーダー、デフォルト非表示）
             var selectHighlight = CreateUIObject("SelectHighlight", cardTemplate.transform);
             SetAnchors(selectHighlight, new Vector2(-0.05f, -0.03f), new Vector2(1.05f, 1.03f), Vector2.zero, Vector2.zero);
             var highlightImage = selectHighlight.AddComponent<Image>();
-            highlightImage.color = new Color(0.831f, 0.686f, 0.216f, 0.6f); // #D4AF37 Gold
+            highlightImage.color = new Color(0.831f, 0.686f, 0.216f, 50f / 255f); // #D4AF37 α=50
             highlightImage.raycastTarget = false;
             // ゴールドボーダーで枠感（TitleScene統一）
             var highlightOutline = selectHighlight.AddComponent<Outline>();
@@ -285,8 +281,9 @@ namespace MagicalCompetition.Editor
         private static void BuildLogPanel(Transform canvasTransform)
         {
             var logPanel = CreateUIObject("LogPanel", canvasTransform);
-            // 左下: 手札エリアと同じ高さまで、幅は左側14%
-            SetAnchors(logPanel, new Vector2(0f, 0.01f), new Vector2(0.14f, 0.30f), Vector2.zero, Vector2.zero);
+            // 左下: 幅25%、高さ55%まで + offset調整
+            SetAnchors(logPanel, new Vector2(0f, 0f), new Vector2(0.25f, 0.55f),
+                new Vector2(10, 10), new Vector2(50, 80));
 
             // 背景 #2D1B5E alpha 0.80 — TitleScene統一パネル色
             var bgImage = logPanel.AddComponent<Image>();
@@ -340,18 +337,18 @@ namespace MagicalCompetition.Editor
         private static void BuildActionPanel(Transform canvasTransform)
         {
             var actionPanel = CreateUIObject("ActionPanel", canvasTransform);
-            SetAnchors(actionPanel, new Vector2(0.74f, 0.01f), new Vector2(0.99f, 0.30f), Vector2.zero, Vector2.zero);
+            SetAnchors(actionPanel, new Vector2(0.74f, 0.01f), new Vector2(0.99f, 0.45f), Vector2.zero, Vector2.zero);
 
-            // DeckInfoRow（上部に山札・手札表示）
+            // DeckInfoRow（中段に山札・手札表示）
             var deckArea = CreateUIObject("DeckInfoRow", actionPanel.transform);
-            SetAnchors(deckArea, new Vector2(0.05f, 0.70f), new Vector2(0.95f, 0.95f), Vector2.zero, Vector2.zero);
+            SetAnchors(deckArea, new Vector2(0.05f, 0.36f), new Vector2(0.95f, 0.54f), Vector2.zero, Vector2.zero);
 
-            var deckCountText = CreateTextObject("DeckCountText", deckArea.transform, "山札: 0枚", 14);
+            var deckCountText = CreateTextObject("DeckCountText", deckArea.transform, "山札: 0", 14);
             SetAnchors(deckCountText.gameObject, new Vector2(0f, 0.5f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
             deckCountText.alignment = TextAnchor.MiddleCenter;
             deckCountText.color = Color.white;
 
-            var handCountText = CreateTextObject("HandCountText", deckArea.transform, "手札: 0枚", 14);
+            var handCountText = CreateTextObject("HandCountText", deckArea.transform, "手札: 0", 14);
             SetAnchors(handCountText.gameObject, new Vector2(0f, 0f), new Vector2(1f, 0.5f), Vector2.zero, Vector2.zero);
             handCountText.alignment = TextAnchor.MiddleCenter;
             handCountText.color = new Color(0.8f, 0.8f, 0.8f);
@@ -369,19 +366,19 @@ namespace MagicalCompetition.Editor
             SetPrivateField(deckView, "_handCountText", handCountText);
             SetPrivateField(deckView, "_reachIndicator", reachIndicator);
 
-            // PlayButton #2D8A5E
-            var playBtn = CreateButton("PlayButton", actionPanel.transform, "出す");
-            SetAnchors(playBtn, new Vector2(0.05f, 0.38f), new Vector2(0.95f, 0.65f), Vector2.zero, Vector2.zero);
-            var playBtnImg = playBtn.GetComponent<Image>();
-            if (playBtnImg != null)
-                playBtnImg.color = new Color(0.416f, 0.239f, 0.722f); // #6A3DB8 — TitleScene統一
-
-            // PassButton — 暗めパープル #3D2878
-            var passBtn = CreateButton("PassButton", actionPanel.transform, "パス");
-            SetAnchors(passBtn, new Vector2(0.05f, 0.05f), new Vector2(0.95f, 0.32f), Vector2.zero, Vector2.zero);
+            // PassButton — ダークレッド #8A2D2D（上段、高さ25%）
+            var passBtn = CreateButton("PassButton", actionPanel.transform, "\u00D7 パス");
+            SetAnchors(passBtn, new Vector2(0.05f, 0.70f), new Vector2(0.95f, 0.95f), Vector2.zero, Vector2.zero);
             var passBtnImg = passBtn.GetComponent<Image>();
             if (passBtnImg != null)
-                passBtnImg.color = new Color(0.239f, 0.157f, 0.471f); // #3D2878 — TitleScene統一
+                passBtnImg.color = new Color(0.541f, 0.176f, 0.176f); // #8A2D2D
+
+            // PlayButton — ダークグリーン #2D8A5E（下側、高さ25%）
+            var playBtn = CreateButton("PlayButton", actionPanel.transform, "\u270B 出す");
+            SetAnchors(playBtn, new Vector2(0.05f, 0.03f), new Vector2(0.95f, 0.28f), Vector2.zero, Vector2.zero);
+            var playBtnImg = playBtn.GetComponent<Image>();
+            if (playBtnImg != null)
+                playBtnImg.color = new Color(0.176f, 0.541f, 0.369f); // #2D8A5E
 
             // 確定ボタン（非表示）
             var confirmBtn = CreateButton("ConfirmButton", actionPanel.transform, "確定");
@@ -439,96 +436,7 @@ namespace MagicalCompetition.Editor
             resultOverlay.SetActive(false);
         }
 
-        // ============================================================
-        // AIInfoPanel
-        // ============================================================
-        private static GameObject CreateAIInfoPanel(string name, Transform parent, int aiIndex)
-        {
-            var panel = CreateUIObject(name, parent);
-            var layoutElem = panel.AddComponent<LayoutElement>();
-            layoutElem.flexibleWidth = 1;
-            layoutElem.flexibleHeight = 1;
-
-            var bg = panel.AddComponent<Image>();
-            bg.color = new Color(0.176f, 0.106f, 0.369f, 0.80f); // #2D1B5E CC — TitleScene統一
-
-            // 上段 80%~100%: AI名 + 山札枚数 + アイコン + トータル
-            var aiNameText = CreateTextObject("AINameText", panel.transform, $"AI{aiIndex}", 11);
-            SetAnchors(aiNameText.gameObject, new Vector2(0.02f, 0.8f), new Vector2(0.22f, 1f), Vector2.zero, Vector2.zero);
-            aiNameText.color = Color.white;
-            aiNameText.alignment = TextAnchor.MiddleCenter;
-            aiNameText.raycastTarget = false;
-
-            // アイコンフレーム（circle mask プレイスホルダー）
-            var iconFrame = CreateUIObject("IconFrame", panel.transform);
-            SetAnchors(iconFrame, new Vector2(0.22f, 0.80f), new Vector2(0.32f, 1f), Vector2.zero, Vector2.zero);
-            var iconImage = iconFrame.AddComponent<Image>();
-            iconImage.color = new Color(0.239f, 0.149f, 0.471f, 0.8f); // #3D2878
-            iconImage.raycastTarget = false;
-            var mask = iconFrame.AddComponent<Mask>();
-            mask.showMaskGraphic = true;
-
-            var deckCountText = CreateTextObject("DeckCountText", panel.transform, "山札:6", 9);
-            SetAnchors(deckCountText.gameObject, new Vector2(0.33f, 0.8f), new Vector2(0.55f, 1f), Vector2.zero, Vector2.zero);
-            deckCountText.color = new Color(0.7f, 0.7f, 0.7f);
-            deckCountText.alignment = TextAnchor.MiddleLeft;
-            deckCountText.raycastTarget = false;
-
-            // TotalCardCount
-            var totalCountText = CreateTextObject("TotalCountText", panel.transform, "計:9枚", 9);
-            SetAnchors(totalCountText.gameObject, new Vector2(0.55f, 0.8f), new Vector2(0.72f, 1f), Vector2.zero, Vector2.zero);
-            totalCountText.color = new Color(0.7f, 0.7f, 0.7f);
-            totalCountText.alignment = TextAnchor.MiddleLeft;
-            totalCountText.raycastTarget = false;
-
-            var reachIcon = CreateUIObject("ReachIcon", panel.transform);
-            SetAnchors(reachIcon, new Vector2(0.72f, 0.8f), new Vector2(0.84f, 1f), Vector2.zero, Vector2.zero);
-            var reachText = CreateTextObject("ReachText", reachIcon.transform, "\u26A1", 11);
-            SetAnchors(reachText.gameObject, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            reachText.alignment = TextAnchor.MiddleCenter;
-            reachText.color = Color.yellow;
-            reachText.raycastTarget = false;
-            reachIcon.SetActive(false);
-
-            var thinkingIcon = CreateUIObject("ThinkingIcon", panel.transform);
-            SetAnchors(thinkingIcon, new Vector2(0.84f, 0.8f), new Vector2(0.98f, 1f), Vector2.zero, Vector2.zero);
-            var thinkText = CreateTextObject("ThinkingText", thinkingIcon.transform, "思考中...", 8);
-            SetAnchors(thinkText.gameObject, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            thinkText.alignment = TextAnchor.MiddleCenter;
-            thinkText.color = Color.cyan;
-            thinkText.raycastTarget = false;
-            thinkingIcon.SetActive(false);
-
-            // 中段: 手札カード裏面
-            var handContainer = CreateUIObject("HandContainer", panel.transform);
-            SetAnchors(handContainer, new Vector2(0.05f, 0.2f), new Vector2(0.95f, 0.78f), Vector2.zero, Vector2.zero);
-            var handLayout = handContainer.AddComponent<HorizontalLayoutGroup>();
-            handLayout.spacing = -2;
-            handLayout.childAlignment = TextAnchor.MiddleCenter;
-            handLayout.childForceExpandWidth = false;
-            handLayout.childForceExpandHeight = true;
-            handLayout.childControlHeight = true;
-            handLayout.childControlWidth = false;
-            handLayout.padding = new RectOffset(2, 2, 0, 0);
-
-            // 下段: 手札枚数
-            var handCountText = CreateTextObject("HandCountText", panel.transform, "3枚", 9);
-            SetAnchors(handCountText.gameObject, new Vector2(0.02f, 0f), new Vector2(0.98f, 0.15f), Vector2.zero, Vector2.zero);
-            handCountText.color = new Color(0.8f, 0.8f, 0.8f);
-            handCountText.alignment = TextAnchor.MiddleCenter;
-            handCountText.raycastTarget = false;
-
-            var aiInfoView = panel.AddComponent<AIInfoView>();
-            SetPrivateField(aiInfoView, "_aiNameText", aiNameText);
-            SetPrivateField(aiInfoView, "_handCountText", handCountText);
-            SetPrivateField(aiInfoView, "_deckCountText", deckCountText);
-            SetPrivateField(aiInfoView, "_totalCountText", totalCountText);
-            SetPrivateField(aiInfoView, "_reachIcon", reachIcon);
-            SetPrivateField(aiInfoView, "_thinkingIcon", thinkingIcon);
-            SetPrivateField(aiInfoView, "_handContainer", handContainer.transform);
-
-            return panel;
-        }
+        // AIInfoPanel は Assets/_Project/Prefabs/UI/AIInfo.prefab を使用
 
         // ============================================================
         // Helpers

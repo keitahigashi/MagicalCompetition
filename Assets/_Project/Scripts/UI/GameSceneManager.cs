@@ -173,7 +173,7 @@ namespace MagicalCompetition.UI
             foreach (var btn in allButtons)
             {
                 if (btn.name == "PlayButton")
-                    StyleButton(btn, UITheme.BtnPlay, UITheme.BtnPlayHover, UITheme.BtnPlayPress);
+                    StyleButton(btn, UITheme.BtnGreen, UITheme.BtnGreenHover, UITheme.BtnGreenPress);
                 else if (btn.name == "PassButton")
                     StyleButton(btn, UITheme.BtnPass, UITheme.BtnPassHover, UITheme.BtnPassPress);
                 else if (btn.name == "ConfirmButton")
@@ -189,23 +189,12 @@ namespace MagicalCompetition.UI
                 UITheme.AddGoldBorder(_turnIndicator.gameObject, 1.5f);
             }
 
-            // --- CenterCard_Root（FieldViewの親）パネル背景＋ゴールドボーダー ---
+            // --- CenterCard_Root — 背景透過（カードとGlowのみ表示） ---
             if (_fieldView != null)
             {
                 var fvImg = _fieldView.GetComponent<Image>();
-                if (fvImg == null)
-                    fvImg = _fieldView.gameObject.AddComponent<Image>();
-                UITheme.ApplyRoundedRect(fvImg, UITheme.PanelDark);
-                UITheme.AddGoldBorder(_fieldView.gameObject, 2f);
-
-                // CardFrame背景をテーマ色に（CardView関連は除外）
-                foreach (Transform child in _fieldView.transform)
-                {
-                    var childImg = child.GetComponent<Image>();
-                    if (childImg != null && child.GetComponent<CardView>() == null
-                        && child.name != "GlowEffect" && child.name != "TurnLabel")
-                        childImg.color = UITheme.PanelMid;
-                }
+                if (fvImg != null)
+                    fvImg.color = new Color(0f, 0f, 0f, 0f);
             }
 
             // --- AIInfoArea 各パネル背景＋ゴールドボーダー ---
@@ -232,7 +221,11 @@ namespace MagicalCompetition.UI
                     // #2D1B5E alpha 0.80 — TitleScene パネルと同じ
                     logImg.color = UITheme.PanelDark;
                 }
-                UITheme.AddGoldBorder(_playLogView.gameObject, 1.5f);
+                var logOutline = _playLogView.gameObject.GetComponent<Outline>();
+                if (logOutline == null)
+                    logOutline = _playLogView.gameObject.AddComponent<Outline>();
+                logOutline.effectColor = new Color(UITheme.GoldBorder.r, UITheme.GoldBorder.g, UITheme.GoldBorder.b, 50f / 255f);
+                logOutline.effectDistance = new Vector2(1.5f, -1.5f);
             }
 
             // --- ActionPanel 背景＋ゴールドボーダー ---
@@ -242,7 +235,11 @@ namespace MagicalCompetition.UI
                 if (actionImg == null)
                     actionImg = _gameUI.gameObject.AddComponent<Image>();
                 UITheme.ApplyRoundedRect(actionImg, UITheme.PanelDark);
-                UITheme.AddGoldBorder(_gameUI.gameObject, 1.5f);
+                var actionOutline = _gameUI.gameObject.GetComponent<Outline>();
+                if (actionOutline == null)
+                    actionOutline = _gameUI.gameObject.AddComponent<Outline>();
+                actionOutline.effectColor = new Color(UITheme.GoldBorder.r, UITheme.GoldBorder.g, UITheme.GoldBorder.b, 50f / 255f);
+                actionOutline.effectDistance = new Vector2(1.5f, -1.5f);
             }
         }
 
@@ -530,6 +527,10 @@ namespace MagicalCompetition.UI
             // カードを1枚ずつ順番に場札へ移動
             foreach (var cv in selectedViews)
             {
+                // 選択ハイライト・背景を非表示にして移動
+                cv.SetSelected(false);
+                cv.SetBackgroundTransparent();
+
                 // LayoutGroupから外してワールド座標で自由に動かす
                 var rt = cv.GetComponent<RectTransform>();
                 Vector3 worldPos = rt.position;

@@ -22,6 +22,24 @@ namespace MagicalCompetition.Views
         private readonly List<GameObject> _cardBacks = new List<GameObject>();
         private Sprite _backSprite;
 
+        private void Awake()
+        {
+            // HandContainerのLayoutGroup設定を補正（Prefab設定に依存しない）
+            if (_handContainer != null)
+            {
+                var hlg = _handContainer.GetComponent<HorizontalLayoutGroup>();
+                if (hlg != null)
+                {
+                    hlg.childForceExpandWidth = false;
+                    hlg.childForceExpandHeight = false;
+                    hlg.childControlWidth = false;
+                    hlg.childControlHeight = true;
+                    hlg.childAlignment = TextAnchor.MiddleCenter;
+                    hlg.spacing = 2;
+                }
+            }
+        }
+
         /// <summary>AIプレイヤーの情報を更新する。</summary>
         public void UpdateInfo(PlayerState aiPlayer)
         {
@@ -29,16 +47,16 @@ namespace MagicalCompetition.Views
                 _aiNameText.text = $"AI{aiPlayer.PlayerId}";
 
             if (_handCountText != null)
-                _handCountText.text = $"{aiPlayer.Hand.Count}枚";
+                _handCountText.text = $"手札: {aiPlayer.Hand.Count}";
 
             if (_deckCountText != null)
-                _deckCountText.text = $"山札:{aiPlayer.Deck.Count}";
+                _deckCountText.text = $"山札: {aiPlayer.Deck.Count}";
 
             // トータルカード数（手札＋山札）表示
             if (_totalCountText != null)
             {
                 int totalCards = aiPlayer.Hand.Count + aiPlayer.Deck.Count;
-                _totalCountText.text = $"計:{totalCards}枚";
+                _totalCountText.text = $"計: {totalCards}";
                 // 残少時（5枚以下）に警告色で強調
                 _totalCountText.color = totalCards <= 5
                     ? new Color(1f, 0.42f, 0.42f) // #FF6B6B
@@ -66,6 +84,7 @@ namespace MagicalCompetition.Views
                 go.transform.SetParent(_handContainer, false);
 
                 var img = go.AddComponent<Image>();
+                img.preserveAspect = true;
                 if (_backSprite != null)
                 {
                     img.sprite = _backSprite;
@@ -75,10 +94,9 @@ namespace MagicalCompetition.Views
                 {
                     img.color = new Color(0.3f, 0.3f, 0.6f);
                 }
-                // AspectRatioFitter で縦に合わせた幅を自動算出
-                var arf = go.AddComponent<AspectRatioFitter>();
-                arf.aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
-                arf.aspectRatio = 0.66f; // カード比率 2:3
+
+                var rt = go.GetComponent<RectTransform>();
+                rt.sizeDelta = new Vector2(45, 30);
 
                 _cardBacks.Add(go);
             }
@@ -137,6 +155,7 @@ namespace MagicalCompetition.Views
                 go.transform.SetParent(_handContainer, false);
 
                 var img = go.AddComponent<Image>();
+                img.preserveAspect = true;
                 if (_backSprite != null)
                 {
                     img.sprite = _backSprite;
@@ -147,9 +166,8 @@ namespace MagicalCompetition.Views
                     img.color = new Color(0.3f, 0.3f, 0.6f);
                 }
 
-                var arf = go.AddComponent<AspectRatioFitter>();
-                arf.aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
-                arf.aspectRatio = 0.66f;
+                var rt = go.GetComponent<RectTransform>();
+                rt.sizeDelta = new Vector2(45, 30);
 
                 _cardBacks.Add(go);
             }

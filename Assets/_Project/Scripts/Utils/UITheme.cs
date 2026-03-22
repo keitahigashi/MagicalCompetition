@@ -25,10 +25,15 @@ namespace MagicalCompetition.Utils
         public static readonly Color BtnPlayHover  = new Color(0.502f, 0.318f, 0.800f); // #8051CC
         public static readonly Color BtnPlayPress  = new Color(0.318f, 0.176f, 0.561f); // #512D8F
 
-        // パス: やや暗めのパープル (#3D2878)
-        public static readonly Color BtnPass      = new Color(0.239f, 0.157f, 0.471f); // #3D2878
-        public static readonly Color BtnPassHover  = new Color(0.318f, 0.220f, 0.561f); // #51388F
-        public static readonly Color BtnPassPress  = new Color(0.176f, 0.110f, 0.369f); // #2D1C5E
+        // パス: ダークレッド (#8A2D2D)
+        public static readonly Color BtnPass      = new Color(0.541f, 0.176f, 0.176f); // #8A2D2D
+        public static readonly Color BtnPassHover  = new Color(0.620f, 0.220f, 0.220f);
+        public static readonly Color BtnPassPress  = new Color(0.440f, 0.140f, 0.140f);
+
+        // プレイ: ダークグリーン (#2D8A5E)
+        public static readonly Color BtnGreen     = new Color(0.176f, 0.541f, 0.369f); // #2D8A5E
+        public static readonly Color BtnGreenHover = new Color(0.220f, 0.620f, 0.420f);
+        public static readonly Color BtnGreenPress = new Color(0.140f, 0.440f, 0.290f);
 
         // 確定: ゴールド系
         public static readonly Color BtnPurple    = new Color(0.416f, 0.239f, 0.722f); // #6A3DB8

@@ -259,8 +259,10 @@ namespace MagicalCompetition.UI
             ApplyRoundedRect(panelBg, colorPanel);
             panelBg.raycastTarget = false;
 
-            // ゴールドボーダー
-            AddGoldBorder(panelGo, 2f);
+            // ゴールドボーダー（α=50/255）
+            var panelOutline = panelGo.AddComponent<Outline>();
+            panelOutline.effectColor = new Color(GoldBorder.r, GoldBorder.g, GoldBorder.b, 50f / 255f);
+            panelOutline.effectDistance = new Vector2(2, -2);
 
             var panelLayout = panelGo.AddComponent<VerticalLayoutGroup>();
             panelLayout.childAlignment = TextAnchor.MiddleCenter;
